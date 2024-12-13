@@ -1,6 +1,6 @@
-import { resetPasswordAction } from "@/app/actions";
-import { FormMessage, Message } from "@/components/form-message";
-import { SubmitButton } from "@/components/submit-button";
+import { resetPasswordAction } from "@/lib/actions/authActions";
+import { FormMessage, Message } from "@/components/forms/form-message";
+import { SubmitButton } from "@/components/forms/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -10,26 +10,26 @@ export default async function ResetPassword(props: {
   const searchParams = await props.searchParams;
   return (
     <form className="flex flex-col w-full max-w-md p-4 gap-2 [&>input]:mb-4">
-      <h1 className="text-2xl font-medium">Reset password</h1>
+      <h1 className="text-2xl font-medium">Resetare parolă</h1>
       <p className="text-sm text-foreground/60">
-        Please enter your new password below.
+        Întroduceți mai jos noua parolă
       </p>
-      <Label htmlFor="password">New password</Label>
+      <Label htmlFor="password">Parolă nouă</Label>
       <Input
         type="password"
         name="password"
-        placeholder="New password"
+        placeholder="Parolă nouă"
         required
       />
-      <Label htmlFor="confirmPassword">Confirm password</Label>
+      <Label htmlFor="confirmPassword">Confirmare parolă</Label>
       <Input
         type="password"
         name="confirmPassword"
-        placeholder="Confirm password"
+        placeholder="Confirmare parolă"
         required
       />
       <SubmitButton formAction={resetPasswordAction}>
-        Reset password
+        Resetare parolă
       </SubmitButton>
       <FormMessage message={searchParams} />
     </form>

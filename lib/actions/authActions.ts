@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export const signUpAction = async (formData: FormData) => {
+export const studentSignUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const supabase = await createClient();
@@ -15,7 +15,7 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       "/sign-up",
-      "Email and password are required",
+      "Email-ul și parola sunt obligatorii",
     );
   }
 
@@ -34,7 +34,41 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect(
       "success",
       "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
+      "Link de verificare trimis pe email.",
+    );
+  }
+};
+
+export const teacherSignUpAction = async (formData: FormData) => {
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
+  const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+
+  if (!email || !password) {
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "Email-ul și parola sunt obligatorii",
+    );
+  }
+
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    console.error(error.code + " " + error.message);
+    return encodedRedirect("error", "/sign-up", error.message);
+  } else {
+    return encodedRedirect(
+      "success",
+      "/sign-up",
+      "Link de verificare trimis pe email.",
     );
   }
 };
@@ -63,11 +97,11 @@ export const forgotPasswordAction = async (formData: FormData) => {
   const callbackUrl = formData.get("callbackUrl")?.toString();
 
   if (!email) {
-    return encodedRedirect("error", "/forgot-password", "Email is required");
+    return encodedRedirect("error", "/forgot-password", "Email-ul este obligatoriu");
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?redirect_to=/protected/reset-password`,
+    redirectTo: `${origin}/auth/callback?redirect_to=/reset-password`,
   });
 
   if (error) {
@@ -75,7 +109,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
     return encodedRedirect(
       "error",
       "/forgot-password",
-      "Could not reset password",
+      "Nu s-a putut reseta parola",
     );
   }
 
@@ -86,7 +120,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   return encodedRedirect(
     "success",
     "/forgot-password",
-    "Check your email for a link to reset your password.",
+    "Link-ul pentru resetarea parolei a fost trimis pe email.",
   );
 };
 
@@ -100,7 +134,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Password and confirm password are required",
+      "Parola și confirmarea parolei sunt obligatorii",
     );
   }
 
@@ -108,7 +142,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Passwords do not match",
+      "Parola și confirmarea parolei nu corespund",
     );
   }
 
@@ -120,11 +154,11 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Password update failed",
+      "Actualizarea parolei a eșuat",
     );
   }
 
-  encodedRedirect("success", "/protected/reset-password", "Password updated");
+  encodedRedirect("success", "/protected/reset-password", "Parola a fost actualizată cu succes");
 };
 
 export const signOutAction = async () => {
