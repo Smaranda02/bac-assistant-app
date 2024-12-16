@@ -6,8 +6,13 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const studentSignUpAction = async (formData: FormData) => {
+  const userId = formData.get("userId")?.toString();
+  const firstName = formData.get("firstName")?.toString();
+  const lastName = formData.get("lastName")?.toString();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const confirmPassword = formData.get("confirmPassword")?.toString();
+  const role = "student";
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
@@ -19,18 +24,51 @@ export const studentSignUpAction = async (formData: FormData) => {
     );
   }
 
+  if (password !== confirmPassword) {
+    return encodedRedirect(
+      "error",
+      "/sign-up",
+      "Parola și confirmarea parolei nu corespund",
+    );
+  }
+
+
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
+      data: { role: role, firstName: firstName, lastName: lastName },
     },
+    
+    
   });
 
   if (error) {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
   } else {
+    const {error: dbErrorStudents} = await supabase.from("Students").insert([
+      {
+        firstname: firstName,
+        lastname: lastName,
+      }
+    ]);
+
+
+    if (dbErrorStudents) {
+      console.error(dbErrorStudents.message);
+      return encodedRedirect("error", "/sign-up", dbErrorStudents.message);
+    }
+
+    const {error: dbErrorUsers} = await supabase.from("Users").insert([
+      {
+        email: email,
+        role: role,
+        student_id: userId,
+      }
+    ]);
+
     return encodedRedirect(
       "success",
       "/sign-up",
@@ -40,9 +78,13 @@ export const studentSignUpAction = async (formData: FormData) => {
 };
 
 export const teacherSignUpAction = async (formData: FormData) => {
+  const firstName = formData.get("firstName")?.toString();
+  const lastName = formData.get("lastName")?.toString();
+  const subjectId = formData.get("subject") ? Number(formData.get("subject")) : null;
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const supabase = await createClient();
+  const role = "teacher";
   const origin = (await headers()).get("origin");
 
   if (!email || !password) {
@@ -58,6 +100,7 @@ export const teacherSignUpAction = async (formData: FormData) => {
     password,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
+      data: { role: role, firstName: firstName, lastName: lastName, subject: subjectId },
     },
   });
 
@@ -65,6 +108,32 @@ export const teacherSignUpAction = async (formData: FormData) => {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
   } else {
+    const {error: dbErrorTeachers} = await supabase.from("Teachers").insert([
+      {
+        firstname: firstName,
+        lastname: lastName,
+        subjectId: subjectId,
+      }
+    ]);
+
+    if (dbErrorTeachers) {
+      console.error(dbErrorTeachers.message);
+      return encodedRedirect("error", "/sign-up", dbErrorTeachers.message);
+    }
+
+    const {error: dbErrorUsers} = await supabase.from("Users").insert([
+      {
+        email: email,
+        role: role,
+      }
+    ]);
+
+    if (dbErrorUsers) {
+      console.error(dbErrorUsers.message);
+      return encodedRedirect("error", "/sign-up", dbErrorUsers.message);
+    }
+
+
     return encodedRedirect(
       "success",
       "/sign-up",

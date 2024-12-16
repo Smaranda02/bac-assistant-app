@@ -50,8 +50,16 @@ export const updateSession = async (request: NextRequest) => {
   }
 
   // redirect logged in user to their home
-  if (request.nextUrl.pathname === "/" && !user.error) {
-    return NextResponse.redirect(new URL("/student", request.url)); // FIXME: check user type
+  if (request.nextUrl.pathname === "/" && user) {
+    const userType = user.data.user?.user_metadata.role;
+    if (userType === "student") {
+      return NextResponse.redirect(new URL("/student", request.url));
+    } else if (userType === "admin") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    } else if (userType === "teacher") {
+      return NextResponse.redirect(new URL("/teacher", request.url));
+    }
+
   }
 
   return response;
