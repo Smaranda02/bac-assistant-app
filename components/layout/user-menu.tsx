@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { createClient } from "@/utils/supabase/server"
-import { signOutAction } from "@/app/actions";
+// import { signOutAction } from "@/app/actions";
 
 export default async function UserMenu() {
   const supabase = await createClient();
@@ -31,7 +31,8 @@ export default async function UserMenu() {
           <User />
           <span>Profil</span>
         </DropdownMenuItem>
-        <form action={signOutAction}>
+        {/* <form action={signOutAction}> */}
+        <form>
           <button type="submit" className="w-full">
           <DropdownMenuItem>
             <LogOut />
