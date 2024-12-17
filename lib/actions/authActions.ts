@@ -5,73 +5,160 @@ import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-export const studentSignUpAction = async (formData: FormData) => {
+const authPaths = {
+  signIn: "/sign-in",
+  studentSignUp: "/register/student",
+  teacherSignUp: "/register/teacher",
+  reset: "/reset-password",
+  forgot: "/forgot-password"
+}
+
+const signUpUser = async (formData: FormData, role: string, redirectPath: string, additionalData: object = {}) => {
+  const firstName = formData.get("firstName")?.toString();
+  const lastName = formData.get("lastName")?.toString();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const confirmPassword = formData.get("confirmPassword")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
   if (!email || !password) {
     return encodedRedirect(
       "error",
-      "/sign-up",
+      redirectPath,
       "Email-ul și parola sunt obligatorii",
     );
   }
+
+  if (password !== confirmPassword) {
+    return encodedRedirect(
+      "error",
+      redirectPath,
+      "Parola și confirmarea parolei nu corespund",
+    );
+  }
+
+  const { data: emailData, error: usersError } = await supabase
+    .from("Users")
+    .select("email")
+    .eq("email", email);
+
+  if (usersError) {
+    console.error(usersError.message);
+    return encodedRedirect("error", redirectPath, usersError.message);
+  }
+
+  if (emailData && emailData.length > 0) {
+    return encodedRedirect(
+      "error",
+      redirectPath,
+      "Email-ul este deja folosit",
+    );
+  }
+
+  const { data: roleData, error: roleError } = await supabase
+    .from("Roles")
+    .select("id")
+    .eq("name", role);
+
+  if (roleError || !roleData) {
+    console.error(roleError?.message || "Role not found");
+    return encodedRedirect("error", redirectPath, roleError?.message || "Role not found");
+  }
+
+  const { error: dbErrorUsers } = await supabase.from("Users").insert([
+    {
+      email: email,
+      roleId: roleData?.[0].id,
+    }
+  ]);
+
+  if (dbErrorUsers) {
+    console.error(dbErrorUsers.message);
+    return encodedRedirect("error", redirectPath, dbErrorUsers.message);
+  }
+
+  const userId = await supabase.from("Users").select("id").eq("email", email);
+  console.log(userId);
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
+      data: { role: role, firstName: firstName, lastName: lastName, ...additionalData },
     },
   });
 
   if (error) {
     console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
-  } else {
+    return encodedRedirect("error", redirectPath, error.message);
+  }
+
+  return userId;
+};
+
+export const studentSignUpAction = async (formData: FormData) => {
+  const userId = await signUpUser(formData, "Student", authPaths.studentSignUp);
+
+  if (userId) {
+    const firstName = formData.get("firstName")?.toString();
+    const lastName = formData.get("lastName")?.toString();
+    const supabase = await createClient();
+
+    const { error: dbErrorStudents } = await supabase.from("Students").insert([
+      {
+        firstname: firstName,
+        lastname: lastName,
+        creditPoints: 0,
+        userId: userId.data ? userId.data[0].id : null,
+      }
+    ]);
+
+    if (dbErrorStudents) {
+      console.error(dbErrorStudents.message);
+      return encodedRedirect("error", authPaths.studentSignUp, dbErrorStudents.message);
+    }
+
     return encodedRedirect(
       "success",
-      "/sign-up",
+      authPaths.studentSignUp,
       "Link de verificare trimis pe email.",
     );
   }
 };
 
 export const teacherSignUpAction = async (formData: FormData) => {
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
-  const supabase = await createClient();
-  const origin = (await headers()).get("origin");
+  const subjectId = formData.get("subject") ? Number(formData.get("subject")) : null;
+  const userId = await signUpUser(formData, "Teacher", authPaths.teacherSignUp, { subject: subjectId });
 
-  if (!email || !password) {
-    return encodedRedirect(
-      "error",
-      "/sign-up",
-      "Email-ul și parola sunt obligatorii",
-    );
-  }
+  if (userId) {
+    const firstName = formData.get("firstName")?.toString();
+    const lastName = formData.get("lastName")?.toString();
+    const supabase = await createClient();
 
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
-  });
+    const { error: dbErrorTeachers } = await supabase.from("Teachers").insert([
+      {
+        firstname: firstName,
+        lastname: lastName,
+        subjectId: subjectId,
+        userId: userId.data ? userId.data[0].id : null,
+      }
+    ]);
 
-  if (error) {
-    console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
-  } else {
+    if (dbErrorTeachers) {
+      console.error(dbErrorTeachers.message);
+      return encodedRedirect("error", authPaths.teacherSignUp, dbErrorTeachers.message);
+    }
+
     return encodedRedirect(
       "success",
-      "/sign-up",
+      authPaths.teacherSignUp,
       "Link de verificare trimis pe email.",
     );
   }
 };
+
 
 export const signInAction = async (formData: FormData) => {
   const email = formData.get("email") as string;
@@ -84,10 +171,10 @@ export const signInAction = async (formData: FormData) => {
   });
 
   if (error) {
-    return encodedRedirect("error", "/sign-in", error.message);
+    return encodedRedirect("error", authPaths.signIn, error.message);
   }
 
-  return redirect("/protected");
+  return redirect("/");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
@@ -97,7 +184,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   const callbackUrl = formData.get("callbackUrl")?.toString();
 
   if (!email) {
-    return encodedRedirect("error", "/forgot-password", "Email-ul este obligatoriu");
+    return encodedRedirect("error", authPaths.forgot, "Email-ul este obligatoriu");
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -108,7 +195,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
     console.error(error.message);
     return encodedRedirect(
       "error",
-      "/forgot-password",
+      authPaths.forgot,
       "Nu s-a putut reseta parola",
     );
   }
@@ -119,7 +206,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
 
   return encodedRedirect(
     "success",
-    "/forgot-password",
+    authPaths.forgot,
     "Link-ul pentru resetarea parolei a fost trimis pe email.",
   );
 };
@@ -133,7 +220,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   if (!password || !confirmPassword) {
     encodedRedirect(
       "error",
-      "/protected/reset-password",
+      authPaths.reset,
       "Parola și confirmarea parolei sunt obligatorii",
     );
   }
@@ -141,7 +228,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   if (password !== confirmPassword) {
     encodedRedirect(
       "error",
-      "/protected/reset-password",
+      authPaths.reset,
       "Parola și confirmarea parolei nu corespund",
     );
   }
@@ -153,16 +240,16 @@ export const resetPasswordAction = async (formData: FormData) => {
   if (error) {
     encodedRedirect(
       "error",
-      "/protected/reset-password",
+      authPaths.reset,
       "Actualizarea parolei a eșuat",
     );
   }
 
-  encodedRedirect("success", "/protected/reset-password", "Parola a fost actualizată cu succes");
+  encodedRedirect("success", authPaths.reset, "Parola a fost actualizată cu succes");
 };
 
 export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  return redirect("/sign-in");
+  return redirect(authPaths.signIn);
 };

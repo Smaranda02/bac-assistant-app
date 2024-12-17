@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { createClient } from "@/utils/supabase/server"
-import { signOutAction } from "@/app/actions";
+import { signOutAction } from "@/lib/actions/authActions";
 
 export default async function UserMenu() {
   const supabase = await createClient();
@@ -19,13 +19,14 @@ export default async function UserMenu() {
     data: { user },
   } = await supabase.auth.getUser();
 
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost">{user?.email}</Button>
+        <Button variant="ghost">{user?.user_metadata.firstName + " " + user?.user_metadata.lastName}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Contul meu</DropdownMenuLabel> {/* FIXME: sau sa scrie rolul userului? */}
+        <DropdownMenuLabel>Contul meu - {user?.user_metadata.role} </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <User />
