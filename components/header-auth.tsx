@@ -1,4 +1,4 @@
-// import { signOutAction } from "@/app/actions";
+import { signOutAction } from "@/lib/actions/authActions";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { createClient } from "@/utils/supabase/server";
@@ -27,12 +27,12 @@ export default async function AuthButton() {
           <DropdownMenuGroup>
             <DropdownMenuItem>
               {/* <Button asChild size="sm"> */}
-                <Link href="/student/register" className="w-full">Sunt elev</Link>
+                <Link href="/register/student" className="w-full">Sunt elev</Link>
               {/* </Button> */}
             </DropdownMenuItem>
             <DropdownMenuItem>
               {/* <Button asChild size="sm"> */}
-                <Link href="/teacher/register" className="w-full">Sunt profesor</Link>
+                <Link href="/register/teacher" className="w-full">Sunt profesor</Link>
               {/* </Button> */}
             </DropdownMenuItem>
           </DropdownMenuGroup>

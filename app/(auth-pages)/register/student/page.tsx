@@ -27,17 +27,38 @@ export default async function Signup(props: {
             Autentifică-te
           </Link>
         </p>
+
+
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
+
+        <Label htmlFor="lastName">Nume</Label>
+        <Input name="lastName" placeholder="Numele tău" required />
+        
+        <Label htmlFor="firstName">Prenume</Label>
+          <Input name="firstName" placeholder="Prenumele tău" required />
+          
+
           <Label htmlFor="email">Email</Label>
-          <Input name="email" placeholder="you@example.com" required />
+          <Input name="email" placeholder="elevul@exemplu.com" required />
+
           <Label htmlFor="password">Parolă</Label>
           <Input
             type="password"
             name="password"
-            placeholder="Your password"
+            placeholder="Parola ta"
             minLength={6}
             required
           />
+
+          <Label htmlFor="confirmPassword">Confirmă parola</Label>
+          <Input
+            type="password"
+            name="confirmPassword"
+            placeholder="Repetă parola"
+            minLength={6}
+            required
+          />
+
           <SubmitButton formAction={studentSignUpAction} pendingText="Se crează contul...">
             Înregistrare
           </SubmitButton>
