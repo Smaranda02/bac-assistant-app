@@ -51,7 +51,7 @@ export const updateSession = async (request: NextRequest) => {
 
   // redirect logged in user to their home
   if (request.nextUrl.pathname === "/" && user) {
-    const userType = user.data.user?.user_metadata.role;
+    const userType = user.data.user?.user_metadata.role?.toLowerCase();
     if (userType === "student") {
       return NextResponse.redirect(new URL("/student", request.url));
     } else if (userType === "admin") {
