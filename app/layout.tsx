@@ -40,7 +40,7 @@ export default function RootLayout({
                   <HeaderAuth />
                 </div>
               </nav>
-              <div className="flex flex-col gap-20 w-full max-w-5xl p-5">
+              <div className="flex flex-col w-full max-w-5xl p-5">
                 {children}
               </div>
 
