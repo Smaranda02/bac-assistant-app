@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { createClient } from "@/utils/supabase/server"
 import { signOutAction } from "@/lib/actions/authActions";
+import Link from "next/link";
 
 export default async function UserMenu() {
   const supabase = await createClient();
@@ -26,15 +27,17 @@ export default async function UserMenu() {
         <Button variant="ghost">{user?.user_metadata.firstName + " " + user?.user_metadata.lastName}</Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Contul meu - {user?.user_metadata.role} </DropdownMenuLabel>
+        <DropdownMenuLabel>Contul meu</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User />
-          <span>Profil</span>
-        </DropdownMenuItem>
+        <Link href={user?.user_metadata.role === "Teacher" ? "/teacher/profile" : "/student/profile"}>
+          <DropdownMenuItem className="cursor-pointer">
+            <User />    
+            <span>Profil</span>
+          </DropdownMenuItem>
+        </Link>
         <form action={signOutAction}>
           <button type="submit" className="w-full">
-          <DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">
             <LogOut />
             <span>Dezautentificare</span>
           </DropdownMenuItem>
