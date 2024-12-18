@@ -36,7 +36,7 @@ export default async function ChapterPage({ params }: { params: { chapter: strin
 
     if (materialsError) {
       console.error("Error fetching chapter materials:", materialsError.message);
-      return <div className="text-red-500">Error loading materials. Please try again later.</div>;
+      return <div className="text-red-500">Eroare la incarcarea materialelor. Te rugam incearca din nou mai tariu.</div>;
     }
 
     return (

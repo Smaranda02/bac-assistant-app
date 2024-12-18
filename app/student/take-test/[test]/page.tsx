@@ -59,7 +59,8 @@ const { error:dbError } = await supabase.from("QuestionsAnswersStudents").upsert
 export default async function TestPage({ params }: { params: { test: string } }) {
 
   const supabase = await createClient();
-  const testId = decodeURIComponent(params.test);
+  const {test} = await params;
+  const testId = decodeURIComponent(test);
   let isSubmitting = false;
   
   const { data: testDetails, error } = await supabase
