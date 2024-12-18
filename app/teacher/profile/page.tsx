@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
@@ -50,11 +51,23 @@ export default async function TeacherProfilePage() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <h3 className="text-lg font-semibold">Contact</h3>
+        <h3 className="text-lg font-semibold">Detalii</h3>
         <div className="my-2 py-2 px-3 rounded border">
           Email: {teacher.email}
         </div>
-        <h3 className="text-lg font-semibold">Teste create</h3>
+        <ul>
+          <li>
+            <Button asChild variant="link">
+              <Link href="#">Schimbă parola »</Link>
+            </Button>
+          </li>
+          <li>
+            <Button asChild variant="link">
+              <Link href="#">Schimbă adresa de email »</Link>
+            </Button>
+          </li>
+        </ul>
+        <h3 className="text-lg font-semibold mt-4">Teste create</h3>
         {teacherTests?.map(t => (
           <Link href={`/teacher/view-test/${t.id}`} key={t.id}>
             <div className="my-2 py-2 px-3 rounded border">
