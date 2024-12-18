@@ -38,7 +38,7 @@ async function submitAnswersAction (formData: FormData) {
     }
   }
 
-const { error:dbError } = await supabase.from("QuestionsAnswersStudents").upsert(
+const { error:dbError } = await supabase.from("QuestionsAnswersStudents").insert(
   answers.map((ans) => ({
     studentId : studentId,
     questionId: ans.questionId,
@@ -52,7 +52,9 @@ const { error:dbError } = await supabase.from("QuestionsAnswersStudents").upsert
     //add redirect to page with error 
   }
   
-  redirect("/generic-pages/submission-success");
+  else {
+    redirect("/generic-pages/submission-success");
+  }
 }
 
 
