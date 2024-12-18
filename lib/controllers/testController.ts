@@ -18,6 +18,34 @@ export type TestSubmission = {
   teacherId: number;
 }
 
+export async function getTestData(testId: number) {
+  const supabase = await createClient();
+  const testQuery = await supabase.from("PracticeTests")
+    .select(`
+      id,
+      name,
+      teacher:Teachers!inner(
+        firstname,
+        lastname
+      ),
+      questions:QuestionsAnswers!inner(
+        id,
+        question,
+        answer,
+        points
+      )
+    `)
+    .eq("id", testId)
+    .single();
+  
+  if (testQuery.error) {
+    console.log(testQuery.error)
+    return null;
+  }
+
+  return testQuery.data;
+}
+
 export async function getTestSubmission(testId: number, studentId: number): Promise<TestSubmission | null> {
   const supabase = await createClient();
   const studentQuery =  await supabase.from("Students")
