@@ -60,3 +60,46 @@ export async function createTestAction(test: Test) {
 
   return { success: "Testul a fost adăugat cu succes" };
 }
+
+export type Grading = {
+  id: number;
+  points: number;
+  feedback: string;
+}
+
+export async function gradeTestAction(testId: number, studentId: number, grade: number, grading: Array<Grading>) {
+  const supabase = await createClient(); 
+  
+  // FIXME: compute grade on backend for better security
+  const gradeQuery = await supabase.from("StudentsTests")
+    .insert({
+      testId,
+      studentId,
+      grade
+    });
+
+  if (gradeQuery.error) {
+    return { error: "Testul a fost deja evaluat" };
+  }
+
+  // FIXME: backend check for grading integrity (not already graded and invalid points)  
+  const pending = grading.map(g => supabase.from("QuestionsAnswersStudents")
+    .update({
+      points: g.points,
+      feedback: g.feedback
+    })
+    .eq("questionId", g.id)
+    .eq("studentId", studentId)
+  );
+
+  const results = await Promise.allSettled([...pending, gradeQuery]);
+
+  // Check for error conditions
+  if (results.some(r => r.status === "rejected" || r.value.error)) {
+    // FIXME: rolling back partial operation
+    console.log(results);
+    return { error: "Eroare la salvare evaluare" };
+  }
+
+  return { success: "Evaluarea a fost trimisă cu succes" };
+}
