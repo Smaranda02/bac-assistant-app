@@ -58,8 +58,6 @@ export default async function TeacherHome() {
     .eq('PracticeTests.teacherId', teacher.id)
     .is('grade', null);
 
-  console.log(teacher.id, submissions, dbSubmissionsError)
-
   return (
     <>
       <section className="bg-secondary mb-4 py-5 px-4 rounded shadow">
@@ -73,7 +71,7 @@ export default async function TeacherHome() {
         </Link>
       </Button> */}
       <section className="my-3" id="submissions">
-        <h3 className="font-bold text-lg">Teste trimise pentru evaluare</h3>
+        <h3 className="font-bold text-lg">Teste de evaluat</h3>
         {submissions?.map(s => (
           <div className="my-2 px-3 py-2 border rounded flex gap-2 items-center" key={`submission-${s.test.id}-${s.student.id}`}>
             <span>{s.test.name}</span>
