@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@radix-ui/r
 import { useState } from "react";
 import { gradeTestAction, Grading } from "@/lib/actions/testActions";
 import { computeTestGrade } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 type Props = {
   testData: TestSubmission
@@ -22,6 +23,7 @@ export default function GradeTest({ testData } : Props) {
   const [isSubmitting, setSubmitting] = useState<boolean>(false);
   const gradedQuestions = grading.reduce((total, g) => !isNaN(g.points) ? total + 1 : total, 0);
   const testGrade = computeTestGrade(testData, grading);
+  const router = useRouter();
 
   return (
     <>
@@ -47,7 +49,7 @@ export default function GradeTest({ testData } : Props) {
                 console.error(resp.error);
                 // FIXME: show error
               } else {
-                // FIXME: redirect
+                router.push("/teacher");
               }
             }}
           >
