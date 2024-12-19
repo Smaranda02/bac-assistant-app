@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 
-export default async function ChapterPage({ params }: { params: { chapter: string } }) {
+export default async function ChapterPage({ params }: { params: Promise<{ chapter: string }> }) {
 
   const supabase = await createClient();
   const {chapter} = await params;
@@ -32,7 +32,7 @@ export default async function ChapterPage({ params }: { params: { chapter: strin
     .eq("chapterId", chapterId)
     .not("contentURL", 'is', null);
 
-    console.log(chapterMaterials);
+    // console.log(chapterMaterials);
 
     if (materialsError) {
       console.error("Error fetching chapter materials:", materialsError.message);
