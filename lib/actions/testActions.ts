@@ -72,15 +72,18 @@ export async function gradeTestAction(testId: number, studentId: number, grade: 
   
   // FIXME: compute grade on backend for better security
   const gradeQuery = await supabase.from("StudentsTests")
-    .insert({
+    .update({
       testId,
       studentId,
       grade
-    });
+    })
+    .eq("studentId", studentId)
+    .eq("testId", testId);
 
-  if (gradeQuery.error) {
-    return { error: "Testul a fost deja evaluat" };
-  }
+  // FIXME: error handling
+  // if (gradeQuery.error) {
+  //   return { error: "Testul a fost deja evaluat" };
+  // }
 
   // FIXME: backend check for grading integrity (not already graded and invalid points)  
   const pending = grading.map(g => supabase.from("QuestionsAnswersStudents")

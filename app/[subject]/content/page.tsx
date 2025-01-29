@@ -1,11 +1,11 @@
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 
-export default async function SubjectPage({ params }: { params: { subject: string } }) {
+export default async function SubjectPage({ params }: { params: Promise<{ subject: string }> }) {
 
   const supabase = await createClient();
 
-  const subjectId = decodeURIComponent(params.subject);
+  const subjectId = decodeURIComponent((await params).subject);
 
   const { data: subject, error } = await supabase
     .from("Subjects")
@@ -25,7 +25,7 @@ export default async function SubjectPage({ params }: { params: { subject: strin
     .eq("subjectId", subjectId)
     ;
 
-    console.log(tests)
+    // console.log(tests)
 
     return (
 

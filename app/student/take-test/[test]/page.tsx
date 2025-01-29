@@ -4,7 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 
-async function submitAnswersAction (formData: FormData) {
+async function submitAnswersAction (testId: number, formData: FormData) {
 
   'use server'
 
@@ -38,14 +38,25 @@ async function submitAnswersAction (formData: FormData) {
     }
   }
 
-const { error:dbError } = await supabase.from("QuestionsAnswersStudents").insert(
-  answers.map((ans) => ({
-    studentId : studentId,
-    questionId: ans.questionId,
-    answer: ans.answer,
-    points: 0,
-    feedback: ""
-  })));
+  const { error:dbInsertError } = await supabase.from("StudentsTests")
+    .insert({
+      studentId: studentId,
+      testId
+    });
+
+  // FIXME: error checking
+  if (dbInsertError) {
+    console.log(dbInsertError);
+  }
+
+  const { error:dbError } = await supabase.from("QuestionsAnswersStudents").insert(
+    answers.map((ans) => ({
+      studentId : studentId,
+      questionId: ans.questionId,
+      answer: ans.answer,
+      points: 0,
+      feedback: ""
+    })));
 
   if (dbError) {
     console.error("Error inserting answers:", dbError.message);
@@ -58,7 +69,7 @@ const { error:dbError } = await supabase.from("QuestionsAnswersStudents").insert
 }
 
 
-export default async function TestPage({ params }: { params: { test: string } }) {
+export default async function TestPage({ params }: { params: Promise<{ test: string }> }) {
 
   const supabase = await createClient();
   const {test} = await params;
@@ -102,7 +113,7 @@ export default async function TestPage({ params }: { params: { test: string } })
       </div>
 
       {/* Form for Submitting Answers */}
-      <form action={submitAnswersAction} className="space-y-8 mt-8">
+      <form action={submitAnswersAction.bind(null, parseInt(testId))} className="space-y-8 mt-8">
         {(testQuestions ?? []).length > 0  ? (
           testQuestions?.map((question, index) => (
             <div
