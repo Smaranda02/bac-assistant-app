@@ -51,7 +51,6 @@ export async function getTestData(testId: number) {
 
 export async function getTestSubmission(submissionId: number): Promise<TestSubmission | null> {
   const supabase = await createClient();
-
   const testQuery = await supabase.from("StudentsTests")
     .select(`
       submissionId,
@@ -80,7 +79,51 @@ export async function getTestSubmission(submissionId: number): Promise<TestSubmi
     .single();
 
   if (testQuery.error) {
-    console.error(testQuery.error);
+    console.log(testQuery.error);
+    return null;
+  }
+
+  return testQuery.data;
+}
+
+export async function getGradedSubmission(submissionId: number, studentId: number) {
+  const supabase = await createClient();
+  const testQuery = await supabase.from("StudentsTests")
+    .select(`
+      submissionId,
+      grade,
+      gradedAt,
+      creditsReceived,
+      test:PracticeTests!inner(
+        id,
+        name,
+        teacher:Teachers!inner(
+          firstname,
+          lastname
+        )
+      ),
+      questions:QuestionsAnswersStudents!inner(
+        studentAnswer:answer,
+        feedback,
+        points,
+        ...QuestionsAnswers!inner(
+          id,
+          question,
+          correctAnswer:answer,
+          totalPoints:points
+        )
+      )
+    `)
+    .eq('submissionId', submissionId)
+    .eq('studentId', studentId)
+    .single();
+
+  if (testQuery.error) {
+    console.log(testQuery.error);
+    return null;
+  }
+
+  if (!testQuery.data.grade || !testQuery.data.gradedAt) {
     return null;
   }
 
