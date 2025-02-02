@@ -1,9 +1,9 @@
 "use server";
 
-import { addCredits } from "../controllers/creditsController";
+import { updateStudentCredits } from "../controllers/studentController";
 
 
 export async function buyCredits(studentId: number, amount: number) {
-  const result = await addCredits(studentId, amount);
+  const result = await updateStudentCredits(studentId, amount);
   return result;
 }

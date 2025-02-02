@@ -1,4 +1,4 @@
-import BuyCreditsDialog from "@/components/dialogs/buyCreditsDialog";
+import BuyCreditsDialog from "@/components/dialogs/buy-credits-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCurrentUser } from "@/lib/controllers/userController";

@@ -3,6 +3,10 @@
 import { createClient } from "@/utils/supabase/server";
 import { computeTestGrade } from "../utils";
 import { getTestSubmission } from "../controllers/testController";
+import { getCurrentUser } from "../controllers/userController";
+import { notFound, redirect } from "next/navigation";
+import { rewardCredits, testCredits } from "../config";
+import { updateStudentCredits } from "../controllers/studentController";
 
 export type Test = {
   name: string;
@@ -63,6 +67,58 @@ export async function createTestAction(test: Test) {
   return { success: "Testul a fost adăugat cu succes" };
 }
 
+export async function submitAnswersAction(testId: number, formData: FormData) {
+  const supabase = await createClient();
+  const answers = [];
+  const formEntries = Array.from(formData.entries());
+  const user = await getCurrentUser();
+
+  if (!user || !user.student || user.student.creditPoints < testCredits) {
+    return notFound();
+  }
+
+  for (const [key, value] of formEntries) {
+    if (key.startsWith("answer_")) {
+      answers.push({
+        questionId: Number(key.replace("answer_", "")), // Extract the numeric ID from the key
+        answer: value.toString()
+      });
+    }
+  }
+
+  const updateCreditsResult = await updateStudentCredits(user.student.id, -testCredits);
+  if (!updateCreditsResult) {
+    return; // FIXME: redirect cu query params pentru erori
+  }
+
+  const submissionInsert = await supabase.from("StudentsTests")
+    .insert({
+      studentId: user.student.id,
+      testId
+    })
+    .select(`submissionId`)
+    .single();
+
+  if (submissionInsert.error) {
+    console.log(submissionInsert.error);
+    return; // FIXME: redirect cu query params pentru erori
+  }
+
+  const answersInsert = await supabase.from("QuestionsAnswersStudents").insert(
+    answers.map((ans) => ({
+      submissionId : submissionInsert.data.submissionId,
+      questionId: ans.questionId,
+      answer: ans.answer,
+    })));
+
+  if (answersInsert.error) {
+    console.error("Error inserting answers:", answersInsert.error);
+    return; // FIXME: redirect cu query params pentru erori
+  }
+  
+  return redirect("/student");
+}
+
 export type Grading = {
   id: number;
   points: number;
@@ -75,14 +131,17 @@ export async function gradeTestAction(submissionId: number, grading: Array<Gradi
   // FIXME: compute grade on backend for better security
   const submissionData = await getTestSubmission(submissionId);
   if (!submissionData) {
-  return { error: "Parametri incorecți" };
+    return { error: "Parametri incorecți" };
   }
 
   const grade = computeTestGrade(submissionData, grading);
+  const creditsReceived = Math.floor((grade / 100) * rewardCredits);
 
   const gradeQuery = await supabase.from("StudentsTests")
     .update({
-      grade
+      grade,
+      gradedAt: (new Date(Date.now())).toISOString(),
+      creditsReceived
     })
     .eq("submissionId", submissionId);
 
@@ -109,6 +168,9 @@ export async function gradeTestAction(submissionId: number, grading: Array<Gradi
     console.log(results);
     return { error: "Eroare la salvare evaluare" };
   }
+
+  // Update student credits based on received grade
+  await updateStudentCredits(submissionData.student.id, creditsReceived);
 
   return { success: "Evaluarea a fost trimisă cu succes" };
 }
