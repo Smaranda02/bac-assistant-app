@@ -8,7 +8,10 @@ export async function getTeacherTests(teacherId: number) {
       name,
       created_at
     `)
-    .eq("teacherId", teacherId);
+    .eq("teacherId", teacherId)
+    .order("created_at", {
+      ascending: true
+    });
   
   if (query.error) {
     console.log(query.error);
@@ -37,7 +40,10 @@ export async function getTeacherUngradedSubmissions(teacherId: number) {
       grade
     `)
     .eq('PracticeTests.teacherId', teacherId)
-    .is('grade', null);
+    .is('grade', null)
+    .order('submittedAt', {
+      ascending: true
+    });
   
     if (query.error) {
       console.log(query.error);
