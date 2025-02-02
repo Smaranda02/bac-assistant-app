@@ -3,12 +3,12 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import TestModal from "@/components/testModal/TestModal";
 import { formatDate } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/controllers/userController";
 import { getStudentTestResults } from "@/lib/controllers/studentController";
 import { getRecentTests } from "@/lib/controllers/testController";
 import { getSubjects } from "@/lib/controllers/contentController";
+import TakeTestDialog from "@/components/dialogs/take-test-dialog";
 
 export default async function StudentHome() {
   const user = await getCurrentUser();
@@ -100,9 +100,9 @@ export default async function StudentHome() {
               </div>
             </div>
             <Badge variant="secondary">{t.subject.name}</Badge>
-            <TestModal test={t}>
+            <TakeTestDialog test={t}>
               <Button size="sm" className="ml-4" variant="secondary">Susține test</Button>
-            </TestModal>
+            </TakeTestDialog>
           </div>
         ))}
         {recentTests.length === 0 && (

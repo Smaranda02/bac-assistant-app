@@ -1,4 +1,5 @@
-import TestModal from "@/components/testModal/TestModal";
+import TakeTestDialog from "@/components/dialogs/take-test-dialog";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 
@@ -76,7 +77,9 @@ export default async function SubjectPage({
                 {test.name}
               </h3>
 
-              <TestModal test={test} /> 
+              <TakeTestDialog test={test}>
+                <Button variant="link">Susține test</Button>
+              </TakeTestDialog>
 
             </div>
           ))}
