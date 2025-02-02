@@ -1,0 +1,35 @@
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+
+const subjects = [
+  {name: "Informatică", id: 0},
+  {name: "Matematică", id: 1}
+]
+
+export default function Page() {
+  return (
+    <section className="my-3">
+      <div className="flex items-center justify-between h-9">
+        <h2 className="text-xl font-bold">Materii</h2>
+        <Button size="sm" variant="default" asChild>
+          <Link href="/admin/content/create-subject">
+            Adaugă materie
+          </Link>
+        </Button>
+      </div>
+      {subjects.map(s => (
+        <div className="my-2 px-3 py-2 border rounded flex gap-2 items-center bg-white" key={`subject-${s.id}`}>
+          <span>{s.name}</span>
+          <Button size="sm" className="ml-auto" variant="secondary" asChild>
+            <Link href={`/admin/content/view-subject/${1}`}>
+              Capitole
+            </Link>
+          </Button>
+        </div>
+      ))}
+      {subjects.length == 0 && (
+        <div className="text-muted-foreground my-2">Nu există nicio materie.</div>
+      )}
+    </section>
+  );
+}
