@@ -96,7 +96,7 @@ export default async function StudentHome() {
             <div className="mr-auto py-1">
               <div className="font-bold">{t.name}</div>
               <div className="text-sm text-muted-foreground" title={(new Date(t.created_at).toLocaleString())}>
-                Creat pe {formatDate(t.created_at)}, de către {}
+                Creat pe {formatDate(t.created_at)}, de către {t.teacher.firstname} {t.teacher.lastname}
               </div>
             </div>
             <Badge variant="secondary">{t.subject.name}</Badge>

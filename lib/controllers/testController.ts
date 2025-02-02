@@ -59,6 +59,10 @@ export async function getRecentTests() {
       subject:Subjects!inner(
         id,
         name
+      ),
+      teacher:Teachers!inner(
+        firstname,
+        lastname
       )
     `)
     .gte("created_at", new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString());
