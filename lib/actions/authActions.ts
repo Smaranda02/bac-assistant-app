@@ -238,6 +238,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   });
 
   if (error) {
+    console.log(error);
     encodedRedirect(
       "error",
       authPaths.reset,
