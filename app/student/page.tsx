@@ -75,8 +75,8 @@ export default async function StudentHome() {
               </div>
             </div>
             <Badge variant="secondary">{t.subjectName}</Badge>
-            <Badge variant="secondary">Notă: {t.grade}%</Badge>
-            <Badge variant="secondary" className="bg-green-300 hover:bg-green-300">+ {t.creditsReceived ?? 0} puncte credit</Badge>
+            <Badge variant="secondary" className="w-24">Notă: {t.grade}%</Badge>
+            <Badge variant="secondary" className="w-32 bg-green-300 hover:bg-green-300">+ {t.creditsReceived ?? 0} puncte credit</Badge>
             <Button size="sm" className="ml-4" variant="secondary" asChild>
               <Link href={`/student/view-test-feedback/${t.submissionId}`}>
                 Vizualizare

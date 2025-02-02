@@ -11,7 +11,10 @@ export async function getStudentTestResults(studentId: number) {
       )
     `)
     .eq("studentId", studentId)
-    .not("grade", "is", null);
+    .not("grade", "is", null)
+    .order("gradedAt", {
+      ascending: false
+    });
 
   if (gradedTests.error) {
     console.log("Graded tests", gradedTests.error);

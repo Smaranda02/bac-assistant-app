@@ -9,8 +9,8 @@ export type TestSubmission = {
   };
   student: {
     id: number;
-    firstname: string | null;
-    lastname: string | null;
+    firstname: string;
+    lastname: string;
   };
   questions: {
     id: number;
