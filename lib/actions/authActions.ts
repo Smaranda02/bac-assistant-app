@@ -99,11 +99,11 @@ const signUpUser = async (formData: FormData, role: string, redirectPath: string
 };
 
 export const studentSignUpAction = async (formData: FormData) => {
+  const firstName = formData.get("firstName")?.toString();
+  const lastName = formData.get("lastName")?.toString();
   const userId = await signUpUser(formData, "Student", authPaths.studentSignUp);
 
-  if (userId) {
-    const firstName = formData.get("firstName")?.toString();
-    const lastName = formData.get("lastName")?.toString();
+  if (userId && userId.data && firstName && lastName) {
     const supabase = await createClient();
 
     const { error: dbErrorStudents } = await supabase.from("Students").insert([
@@ -111,7 +111,7 @@ export const studentSignUpAction = async (formData: FormData) => {
         firstname: firstName,
         lastname: lastName,
         creditPoints: 0,
-        userId: userId.data ? userId.data[0].id : null,
+        userId: userId.data[0].id,
       }
     ]);
 
@@ -130,11 +130,11 @@ export const studentSignUpAction = async (formData: FormData) => {
 
 export const teacherSignUpAction = async (formData: FormData) => {
   const subjectId = formData.get("subject") ? Number(formData.get("subject")) : null;
+  const firstName = formData.get("firstName")?.toString();
+  const lastName = formData.get("lastName")?.toString();
   const userId = await signUpUser(formData, "Teacher", authPaths.teacherSignUp, { subject: subjectId });
 
-  if (userId) {
-    const firstName = formData.get("firstName")?.toString();
-    const lastName = formData.get("lastName")?.toString();
+  if (userId && userId.data && firstName && lastName && subjectId) {
     const supabase = await createClient();
 
     const { error: dbErrorTeachers } = await supabase.from("Teachers").insert([
@@ -142,7 +142,7 @@ export const teacherSignUpAction = async (formData: FormData) => {
         firstname: firstName,
         lastname: lastName,
         subjectId: subjectId,
-        userId: userId.data ? userId.data[0].id : null,
+        userId: userId.data[0].id,
       }
     ]);
 
@@ -238,6 +238,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   });
 
   if (error) {
+    console.log(error);
     encodedRedirect(
       "error",
       authPaths.reset,

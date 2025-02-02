@@ -8,8 +8,9 @@ export default async function SubjectPage({
   params: { subject: string };
 }) {
   const supabase = await createClient();
-  const subjectId = decodeURIComponent(params.subject);
-  
+
+  const subjectId = decodeURIComponent((await params).subject);
+
   const { data: subject, error } = await supabase
     .from("Subjects")
     .select("name")
@@ -26,7 +27,7 @@ export default async function SubjectPage({
     .select("id, name")
     .eq("subjectId", subjectId);
 
-  console.log(tests);
+    // console.log(tests)
 
   return (
     <div className="container mx-auto py-8">

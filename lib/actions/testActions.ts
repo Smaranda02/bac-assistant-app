@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { computeTestGrade } from "../utils";
+import { getTestSubmission } from "../controllers/testController";
 
 export type Test = {
   name: string;
@@ -59,4 +61,54 @@ export async function createTestAction(test: Test) {
   }
 
   return { success: "Testul a fost adăugat cu succes" };
+}
+
+export type Grading = {
+  id: number;
+  points: number;
+  feedback: string;
+}
+
+export async function gradeTestAction(submissionId: number, grading: Array<Grading>) {
+  const supabase = await createClient(); 
+  
+  // FIXME: compute grade on backend for better security
+  const submissionData = await getTestSubmission(submissionId);
+  if (!submissionData) {
+  return { error: "Parametri incorecți" };
+  }
+
+  const grade = computeTestGrade(submissionData, grading);
+
+  const gradeQuery = await supabase.from("StudentsTests")
+    .update({
+      grade
+    })
+    .eq("submissionId", submissionId);
+
+  // FIXME: error handling
+  // if (gradeQuery.error) {
+  //   return { error: "Testul a fost deja evaluat" };
+  // }
+
+  // FIXME: backend check for grading integrity (not already graded and invalid points)  
+  const pending = grading.map(g => supabase.from("QuestionsAnswersStudents")
+    .update({
+      points: g.points,
+      feedback: g.feedback
+    })
+    .eq("questionId", g.id)
+    .eq("submissionId", submissionId)
+  );
+
+  const results = await Promise.allSettled([...pending, gradeQuery]);
+
+  // Check for error conditions
+  if (results.some(r => r.status === "rejected" || r.value.error)) {
+    // FIXME: rolling back partial operation
+    console.log(results);
+    return { error: "Eroare la salvare evaluare" };
+  }
+
+  return { success: "Evaluarea a fost trimisă cu succes" };
 }
