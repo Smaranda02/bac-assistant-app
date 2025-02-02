@@ -56,7 +56,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ chapte
                 
                   {/* File link */}
                   <Link href={material?.contentURL || ""} target="_blank" rel="noopener noreferrer">
-                    <p className="text-blue-600 hover:underline">Open Document</p>
+                    <p className="text-blue-600 hover:underline">Deschide documentul</p>
                   </Link>
                 </CardContent>
               </Card>
