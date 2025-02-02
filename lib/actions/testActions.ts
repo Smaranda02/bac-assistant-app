@@ -5,7 +5,8 @@ import { computeTestGrade } from "../utils";
 import { getTestSubmission } from "../controllers/testController";
 import { getCurrentUser } from "../controllers/userController";
 import { notFound, redirect } from "next/navigation";
-import { testCredits } from "../config";
+import { rewardCredits, testCredits } from "../config";
+import { updateStudentCredits } from "../controllers/studentController";
 
 export type Test = {
   name: string;
@@ -85,14 +86,8 @@ export async function submitAnswersAction(testId: number, formData: FormData) {
     }
   }
 
-  const studentCreditsUpdate = await supabase.from("Students")
-    .update({
-      creditPoints: user.student.creditPoints - testCredits
-    })
-    .eq("id", user.student.id);
-
-  if (studentCreditsUpdate.error) {
-    console.log("Update student credits", studentCreditsUpdate.error);
+  const updateCreditsResult = await updateStudentCredits(user.student.id, -testCredits);
+  if (!updateCreditsResult) {
     return; // FIXME: redirect cu query params pentru erori
   }
 
@@ -136,14 +131,17 @@ export async function gradeTestAction(submissionId: number, grading: Array<Gradi
   // FIXME: compute grade on backend for better security
   const submissionData = await getTestSubmission(submissionId);
   if (!submissionData) {
-  return { error: "Parametri incorecți" };
+    return { error: "Parametri incorecți" };
   }
 
   const grade = computeTestGrade(submissionData, grading);
+  const creditsReceived = Math.floor((grade / 100) * rewardCredits);
 
   const gradeQuery = await supabase.from("StudentsTests")
     .update({
-      grade
+      grade,
+      gradedAt: (new Date(Date.now())).toISOString(),
+      creditsReceived
     })
     .eq("submissionId", submissionId);
 
@@ -170,6 +168,9 @@ export async function gradeTestAction(submissionId: number, grading: Array<Gradi
     console.log(results);
     return { error: "Eroare la salvare evaluare" };
   }
+
+  // Update student credits based on received grade
+  await updateStudentCredits(submissionData.student.id, creditsReceived);
 
   return { success: "Evaluarea a fost trimisă cu succes" };
 }

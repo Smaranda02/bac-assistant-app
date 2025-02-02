@@ -23,26 +23,3 @@ export async function getCurrentUser() {
 
   return userData;
 }
-
-export async function getStudent(email: string) {
-  const supabase = await createClient();
-  const { data: student, error } = await supabase.from('Students')
-    .select(`
-      id,
-      firstname,
-      lastname,
-      creditPoints,
-      ...Users!inner(
-        email
-      )
-    `)
-    .eq('Users.email', email)
-    .single();
-
-  if (error || !student) {
-    console.log(error)
-    return null;
-  }
-
-  return student;
-}
