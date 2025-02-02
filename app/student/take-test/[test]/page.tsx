@@ -1,3 +1,4 @@
+import CancelTestModal from "@/components/cancelTestModel/CancelTestModel";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 // import { submitAnswersAction } from "@/lib/actions/submitAnswersActions";
@@ -13,8 +14,9 @@ async function submitAnswersAction (formData: FormData) {
   const formEntries = Array.from(formData.entries());
 
   const {data: {user} } = await supabase.auth.getUser();
-  const studentEmail = user?.user_metadata?.email;
 
+  const studentEmail = user?.user_metadata?.email;
+  
     const {data: userDetails, error: err} = await supabase 
     .from("Users")
     .select("id")
@@ -153,9 +155,7 @@ export default async function TestPage({ params }: { params: { test: string } })
       </form>
 
       <div className="text-center mt-8">
-        <Link href="/" className="text-blue-500 hover:underline">
-          Înapoi la pagina principală
-        </Link>
+        <CancelTestModal></CancelTestModal>
       </div>
     </main>
   );

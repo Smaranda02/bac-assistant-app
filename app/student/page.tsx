@@ -1,6 +1,7 @@
 import { createClient } from "@/utils/supabase/server"
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import TestModal from "@/components/testModal/TestModal";
 
 export default async function StudentHome()
 {
@@ -13,7 +14,7 @@ export default async function StudentHome()
 
     const { data: tests, error: testError } = await supabase
     .from("PracticeTests")
-    .select("id, name")
+    .select("id, name, created_at, Subjects(id, name)")
     .gte("created_at", new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString());
     ;
 
@@ -64,9 +65,24 @@ export default async function StudentHome()
         {tests && tests.length > 0 ? (
           <div className="space-y-4">
             {tests.map((test) => (
-              <Link key={test.id} href={`/student/take-test/${test.id}`} passHref>
-                <p className="block text-xl text-blue-600 hover:underline">{test.name}</p>
-              </Link>
+
+
+            <div
+              key={test.id}
+              className="p-6 bg-white border border-gray-200 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <h3 className="text-xl font-semibold text-gray-800">
+                <p>Materie : {test.Subjects?.name}</p>
+                <p>Adaugat pe data : {test.created_at.split("T")[0]}, ora : {test.created_at.split("T")[1].split(".")[0]}</p>
+                <p className="block text-xl text-black-600">Nume test : {test.name}</p>
+
+              <TestModal test={test} /> 
+              </h3>
+
+             
+            </div>
+
+             
             ))}
           </div>
         ) : (
