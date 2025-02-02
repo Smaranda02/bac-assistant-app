@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { formatDate } from "@/lib/utils";
 import { getCurrentUser } from "@/lib/controllers/userController";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 type PageParams = {
   submissionId: number;
@@ -27,18 +29,28 @@ export default async function ViewTestFeedbackPage({ params }: PageProps) {
 
   return (
     <>
-      <Card className="shadow-lg flex items-center">
-        <CardHeader>
-            <CardTitle>
-              Test {submissionData.test.name}
-            </CardTitle>
-            <CardDescription>
-              Evaluat de {submissionData.test.teacher.firstname} {submissionData.test.teacher.lastname} la {formatDate(submissionData.gradedAt)}
-            </CardDescription>
-        </CardHeader>
-        <div className="ml-auto text-end pr-6 flex items-center gap-3">
-          <span>{submissionData.questions.length} exerciții, Notă: {submissionData.grade.toFixed(2)}%</span>
-        </div>
+      <Card className="shadow-lg">
+          <div className="flex items-center">
+            <CardHeader className="pb-4">
+              <CardTitle>
+                Test {submissionData.test.name}
+              </CardTitle>
+              <CardDescription>
+                Evaluat de {submissionData.test.teacher.firstname} {submissionData.test.teacher.lastname} la {formatDate(submissionData.gradedAt)}
+              </CardDescription>
+            </CardHeader>
+            <div className="ml-auto text-end pr-6 flex items-center gap-3">
+              <span>{submissionData.questions.length} exerciții, Notă: {submissionData.grade.toFixed(2)}%</span>
+            </div>
+          </div>
+          <div className="mx-5 pb-4 flex gap-2 items-center">
+            <Link href={`/${submissionData.test.subject.id}/content`} className="contents">
+              <Badge variant="secondary" className="hover:bg-gray-300">
+                {submissionData.test.subject.name}
+              </Badge>
+            </Link>
+            <Badge className="bg-green-300 hover:bg-green-300" variant="secondary">+ {submissionData.creditsReceived ?? 0} puncte credit</Badge>
+          </div>
       </Card>
       <div className="mt-4">
         {submissionData.questions.map((q, i) => (

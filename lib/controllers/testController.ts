@@ -49,6 +49,28 @@ export async function getTestData(testId: number) {
   return testQuery.data;
 }
 
+export async function getRecentTests() {
+  const supabase = await createClient();
+  const recentTests = await supabase.from("PracticeTests")
+    .select(`
+      id,
+      name,
+      created_at,
+      subject:Subjects!inner(
+        id,
+        name
+      )
+    `)
+    .gte("created_at", new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString());
+
+  if (recentTests.error) {
+    console.log("Recent tests", recentTests.error);
+    return [];
+  }
+
+  return recentTests.data;
+}
+
 export async function getTestSubmission(submissionId: number): Promise<TestSubmission | null> {
   const supabase = await createClient();
   const testQuery = await supabase.from("StudentsTests")
@@ -100,6 +122,10 @@ export async function getGradedSubmission(submissionId: number, studentId: numbe
         teacher:Teachers!inner(
           firstname,
           lastname
+        ),
+        subject:Subjects!inner(
+          id,
+          name
         )
       ),
       questions:QuestionsAnswersStudents!inner(
