@@ -38,24 +38,25 @@ async function submitAnswersAction (testId: number, formData: FormData) {
     }
   }
 
-  const { error:dbInsertError } = await supabase.from("StudentsTests")
+  const { data: submission, error:dbInsertError } = await supabase.from("StudentsTests")
     .insert({
       studentId: studentId,
       testId
-    });
+    })
+    .select(`submissionId`)
+    .single();
 
   // FIXME: error checking
   if (dbInsertError) {
     console.log(dbInsertError);
+    return;
   }
 
   const { error:dbError } = await supabase.from("QuestionsAnswersStudents").insert(
     answers.map((ans) => ({
-      studentId : studentId,
+      submissionId : submission.submissionId,
       questionId: ans.questionId,
       answer: ans.answer,
-      points: 0,
-      feedback: ""
     })));
 
   if (dbError) {

@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { computeTestGrade } from "../utils";
+import { getTestSubmission } from "../controllers/testController";
 
 export type Test = {
   name: string;
@@ -67,18 +69,22 @@ export type Grading = {
   feedback: string;
 }
 
-export async function gradeTestAction(testId: number, studentId: number, grade: number, grading: Array<Grading>) {
+export async function gradeTestAction(submissionId: number, grading: Array<Grading>) {
   const supabase = await createClient(); 
   
   // FIXME: compute grade on backend for better security
+  const submissionData = await getTestSubmission(submissionId);
+  if (!submissionData) {
+  return { error: "Parametri incorecți" };
+  }
+
+  const grade = computeTestGrade(submissionData, grading);
+
   const gradeQuery = await supabase.from("StudentsTests")
     .update({
-      testId,
-      studentId,
       grade
     })
-    .eq("studentId", studentId)
-    .eq("testId", testId);
+    .eq("submissionId", submissionId);
 
   // FIXME: error handling
   // if (gradeQuery.error) {
@@ -92,7 +98,7 @@ export async function gradeTestAction(testId: number, studentId: number, grade: 
       feedback: g.feedback
     })
     .eq("questionId", g.id)
-    .eq("studentId", studentId)
+    .eq("submissionId", submissionId)
   );
 
   const results = await Promise.allSettled([...pending, gradeQuery]);

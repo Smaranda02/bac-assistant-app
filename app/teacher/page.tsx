@@ -1,62 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/utils/supabase/server"
+import { getTeacherTests, getTeacherUngradedSubmissions } from "@/lib/controllers/teacherController";
+import { getCurrentUser } from "@/lib/controllers/userController";
+import { formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export default async function TeacherHome() {
-  const supabase = await createClient();
-  const user = await supabase.auth.getUser();
-
-  if (user.error || !user.data.user.email) {
-    // FIXME: better error handling
+  const user = await getCurrentUser();
+  if (!user || !user.teacher) {
     return notFound();
   }
-  
-  const { data: teacher, error } = await supabase.from('Teachers')
-    .select(`
-      id,
-      firstname,
-      lastname,
-      subject:Subjects!inner(
-        id,
-        name
-      ),
-      ...Users!inner(
-        email
-      )
-    `)
-    .eq('Users.email', user.data.user?.email)
-    .single();
-
-  if (error || !teacher) {
-    console.log(error)
-    return notFound();
-  }
-  
-  const { data: teacherTests, error: dbError } = await supabase.from("PracticeTests")
-    .select(`
-      id,
-      name,
-      created_at
-    `)
-    .eq("teacherId", teacher.id);
-
-  const { data: submissions, error: dbSubmissionsError } = await supabase.from("StudentsTests")
-    .select(`
-      student:Students!inner(
-        id,
-        firstname,
-        lastname
-      ),
-      test:PracticeTests!inner(
-        id,
-        name,
-        teacherId
-      ),
-      grade
-    `)
-    .eq('PracticeTests.teacherId', teacher.id)
-    .is('grade', null);
+  const teacher = user.teacher;
+  const teacherTests = await getTeacherTests(teacher.id);
+  const submissions = await getTeacherUngradedSubmissions(teacher.id);
 
   return (
     <>
@@ -72,17 +28,20 @@ export default async function TeacherHome() {
       </Button> */}
       <section className="my-3" id="submissions">
         <h3 className="font-bold text-lg">Teste de evaluat</h3>
-        {submissions?.map(s => (
-          <div className="my-2 px-3 py-2 border rounded flex gap-2 items-center" key={`submission-${s.test.id}-${s.student.id}`}>
+        {submissions.map(s => (
+          <div className="my-2 px-3 py-2 border rounded flex gap-2 items-center bg-white" key={`submission-${s.submissionId}`}>
             <span>{s.test.name}</span>
-            <span className="text-muted-foreground">Trimis de {s.student.firstname} {s.student.lastname}</span>
+            <span className="text-muted-foreground">Trimis de {s.student.firstname} {s.student.lastname} la {formatDate(s.submittedAt)}</span>
             <Button size="sm" className="ml-auto" variant="secondary" asChild>
-              <Link href={`/teacher/grade-test/${s.test.id}/${s.student.id}`}>
+              <Link href={`/teacher/grade-test/${s.submissionId}/`}>
                 Evaluează
               </Link>
             </Button>
           </div>
         ))}
+        {submissions.length == 0 && (
+          <div className="text-muted-foreground my-2">Niciun test trimis.</div>
+        )}
       </section>
       <section className="my-3" id="tests">
         <div className="flex items-center justify-between">
@@ -93,10 +52,10 @@ export default async function TeacherHome() {
             </Link>
           </Button>
         </div>
-        {teacherTests?.map(t => (
-          <div className="my-2 px-3 py-2 border rounded flex gap-2 items-center" key={`test-${t.id}`}>
+        {teacherTests.map(t => (
+          <div className="my-2 px-3 py-2 border rounded flex gap-2 items-center bg-white" key={`test-${t.id}`}>
             <span>{t.name}</span>
-            <span className="text-muted-foreground">Creat la {new Date(t.created_at || '1970-01-01').toLocaleDateString()}</span>
+            <span className="text-muted-foreground">Creat la {formatDate(t.created_at)}</span>
             <Button size="sm" className="ml-auto" variant="secondary" asChild>
               <Link href={`/teacher/view-test/${t.id}`}>
                 Vizualizare
@@ -104,6 +63,9 @@ export default async function TeacherHome() {
             </Button>
           </div>
         ))}
+        {teacherTests.length == 0 && (
+          <div className="text-muted-foreground my-2">Niciun test creat.</div>
+        )}
       </section>
     </>
   )

@@ -1,21 +1,24 @@
 import { createClient } from "@/utils/supabase/server";
 
 export type TestSubmission = {
-  id: number;
+  submissionId: number;
+  test: {
+    id: number;
+    name: string;
+    teacherId: number;
+  };
   student: {
     id: number;
     firstname: string | null;
     lastname: string | null;
   };
   questions: {
-    studentAnswer: string;
     id: number;
     question: string;
-    answer: string;
+    studentAnswer: string;
+    correctAnswer: string;
     points: number;
   }[];
-  name: string;
-  teacherId: number;
 }
 
 export async function getTestData(testId: number) {
@@ -46,53 +49,40 @@ export async function getTestData(testId: number) {
   return testQuery.data;
 }
 
-export async function getTestSubmission(testId: number, studentId: number): Promise<TestSubmission | null> {
+export async function getTestSubmission(submissionId: number): Promise<TestSubmission | null> {
   const supabase = await createClient();
-  const studentQuery =  await supabase.from("Students")
-    .select(`id, firstname, lastname`)
-    .eq("id", studentId)
-    .single();
 
-  if (studentQuery.error) {
-    console.error(studentQuery.error);
-  }
-
-  const testQuery = await supabase.from("PracticeTests")
+  const testQuery = await supabase.from("StudentsTests")
     .select(`
-      id,
-      name,
-      teacherId,
-      questions:QuestionsAnswers!inner(
+      submissionId,
+      submittedAt,
+      test:PracticeTests!inner(
         id,
-        question,
-        answer,
-        points,
-        studentAnswer:QuestionsAnswersStudents!inner(
-          answer
+        name,
+        teacherId
+      ),
+      student:Students!inner(
+        id,
+        firstname,
+        lastname
+      ),
+      questions:QuestionsAnswersStudents!inner(
+        studentAnswer:answer,
+        ...QuestionsAnswers!inner(
+          id,
+          question,
+          correctAnswer:answer,
+          points
         )
       )
     `)
-    .eq("id", testId)
-    .eq(
-      "questions.QuestionsAnswersStudents.studentId",
-      studentId,
-    )
+    .eq('submissionId', submissionId)
     .single();
 
   if (testQuery.error) {
     console.error(testQuery.error);
-  }
-
-  if (!studentQuery.data || !testQuery.data) {
     return null;
   }
 
-  // Map studentAnswer to one to one relationship
-  return {
-    ...testQuery.data,
-    student: {
-      ...studentQuery.data
-    },
-    questions: testQuery.data.questions.map(q => ({...q, studentAnswer: q.studentAnswer[0].answer}))
-  }
+  return testQuery.data;
 }

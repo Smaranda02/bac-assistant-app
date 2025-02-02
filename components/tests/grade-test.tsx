@@ -11,18 +11,18 @@ import { computeTestGrade } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 type Props = {
-  testData: TestSubmission
+  submissionData: TestSubmission
 }
 
-export default function GradeTest({ testData } : Props) {
-  const [grading, setGrading] = useState<Array<Grading>>(testData.questions.map(q => ({
+export default function GradeTest({ submissionData } : Props) {
+  const [grading, setGrading] = useState<Array<Grading>>(submissionData.questions.map(q => ({
     id: q.id,
     points: NaN,
     feedback: ''
   })));
   const [isSubmitting, setSubmitting] = useState<boolean>(false);
   const gradedQuestions = grading.reduce((total, g) => !isNaN(g.points) ? total + 1 : total, 0);
-  const testGrade = computeTestGrade(testData, grading);
+  const testGrade = computeTestGrade(submissionData, grading);
   const router = useRouter();
 
   return (
@@ -30,20 +30,20 @@ export default function GradeTest({ testData } : Props) {
       <Card className="shadow-lg sticky top-0 flex items-center z-20">
         <CardHeader>
             <CardTitle>
-              Test {testData.name}
+              Test {submissionData.test.name}
             </CardTitle>
             <CardDescription>
-              Trimis de {testData.student.firstname} {testData.student.lastname}
+              Trimis de {submissionData.student.firstname} {submissionData.student.lastname}
             </CardDescription>
         </CardHeader>
         <div className="ml-auto text-end pr-6 flex items-center gap-3">
-          <span>{gradedQuestions} / {testData.questions.length} exerciții</span>
+          <span>{gradedQuestions} / {submissionData.questions.length} exerciții</span>
           <span>Notă: {testGrade.toFixed(2)}%</span>
           <Button 
-            disabled={gradedQuestions !== testData.questions.length || isSubmitting}
+            disabled={gradedQuestions !== submissionData.questions.length || isSubmitting}
             onClick={async () => {
               setSubmitting(true);
-              const resp = await gradeTestAction(testData.id, testData.student.id, testGrade, grading);
+              const resp = await gradeTestAction(submissionData.submissionId, grading);
               if (resp.error) {
                 setSubmitting(false);
                 console.error(resp.error);
@@ -58,7 +58,7 @@ export default function GradeTest({ testData } : Props) {
         </div>
       </Card>
       <div className="mt-4">
-        {testData.questions.map((q, i) => (
+        {submissionData.questions.map((q, i) => (
           <Card key={i} className="my-3 bg-gray-100">
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -93,7 +93,7 @@ export default function GradeTest({ testData } : Props) {
                 </CollapsibleTrigger>
                 <CollapsibleContent className="py-2 px-3">
                   <pre>
-                    {q.answer}
+                    {q.correctAnswer}
                   </pre>
                 </CollapsibleContent>
               </Collapsible>

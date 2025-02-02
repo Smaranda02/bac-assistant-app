@@ -13,3 +13,13 @@ export function computeTestGrade(testData: TestSubmission, questionPoints: Array
 
   return gradedPoints * 100 / totalPoints;
 }
+
+export function formatDate(date: string) {
+  const dateObj = new Date(date);
+
+  const day = dateObj.getDate().toString().padStart(2, '0');
+  const month = (dateObj.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-based
+  const year = dateObj.getFullYear();
+
+  return `${day}/${month}/${year}`;
+}
