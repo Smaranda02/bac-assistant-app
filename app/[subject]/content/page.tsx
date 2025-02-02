@@ -3,11 +3,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 
-export default async function SubjectPage({
-  params,
-}: {
-  params: { subject: string };
-}) {
+export default async function SubjectPage({params}: {params: { subject: string }; }) {
   const supabase = await createClient();
 
   const subjectId = decodeURIComponent((await params).subject);
