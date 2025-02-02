@@ -3,6 +3,9 @@
 import { createClient } from "@/utils/supabase/server";
 import { computeTestGrade } from "../utils";
 import { getTestSubmission } from "../controllers/testController";
+import { getCurrentUser } from "../controllers/userController";
+import { notFound, redirect } from "next/navigation";
+import { testCredits } from "../config";
 
 export type Test = {
   name: string;
@@ -61,6 +64,64 @@ export async function createTestAction(test: Test) {
   }
 
   return { success: "Testul a fost adăugat cu succes" };
+}
+
+export async function submitAnswersAction(testId: number, formData: FormData) {
+  const supabase = await createClient();
+  const answers = [];
+  const formEntries = Array.from(formData.entries());
+  const user = await getCurrentUser();
+
+  if (!user || !user.student || user.student.creditPoints < testCredits) {
+    return notFound();
+  }
+
+  for (const [key, value] of formEntries) {
+    if (key.startsWith("answer_")) {
+      answers.push({
+        questionId: Number(key.replace("answer_", "")), // Extract the numeric ID from the key
+        answer: value.toString()
+      });
+    }
+  }
+
+  const studentCreditsUpdate = await supabase.from("Students")
+    .update({
+      creditPoints: user.student.creditPoints - testCredits
+    })
+    .eq("id", user.student.id);
+
+  if (studentCreditsUpdate.error) {
+    console.log("Update student credits", studentCreditsUpdate.error);
+    return; // FIXME: redirect cu query params pentru erori
+  }
+
+  const submissionInsert = await supabase.from("StudentsTests")
+    .insert({
+      studentId: user.student.id,
+      testId
+    })
+    .select(`submissionId`)
+    .single();
+
+  if (submissionInsert.error) {
+    console.log(submissionInsert.error);
+    return; // FIXME: redirect cu query params pentru erori
+  }
+
+  const answersInsert = await supabase.from("QuestionsAnswersStudents").insert(
+    answers.map((ans) => ({
+      submissionId : submissionInsert.data.submissionId,
+      questionId: ans.questionId,
+      answer: ans.answer,
+    })));
+
+  if (answersInsert.error) {
+    console.error("Error inserting answers:", answersInsert.error);
+    return; // FIXME: redirect cu query params pentru erori
+  }
+  
+  return redirect("/student");
 }
 
 export type Grading = {

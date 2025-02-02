@@ -1,98 +1,55 @@
 import CancelTestModal from "@/components/cancelTestModel/CancelTestModel";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { submitAnswersAction } from "@/lib/actions/testActions";
+import { testCredits } from "@/lib/config";
+import { getCurrentUser } from "@/lib/controllers/userController";
+import { formatDate } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/server";
+import { AlertCircle } from "lucide-react";
 import Link from "next/link";
-// import { submitAnswersAction } from "@/lib/actions/submitAnswersActions";
-import { redirect } from "next/navigation";
-
-
-async function submitAnswersAction (testId: number, formData: FormData) {
-
-  'use server'
-
-  const supabase = await createClient();
-  const answers = [];
-  const formEntries = Array.from(formData.entries());
-
-  const {data: {user} } = await supabase.auth.getUser();
-
-  const studentEmail = user?.user_metadata?.email;
-  
-    const {data: userDetails, error: err} = await supabase 
-    .from("Users")
-    .select("id")
-    .eq("email", studentEmail)
-    .single();
-
-    const userId = userDetails?.id || 0;
-
-    const {data: userData, error: userError} = await supabase 
-      .from("Students")
-      .select("id")
-      .eq("userId", userId)
-      .single();
-
-    const studentId = userData?.id || 0;
-
-  for (const [key, value] of formEntries) {
-    if (key.startsWith("answer_")) {
-      const questionId = Number(key.replace("answer_", "")); // Extract the numeric ID from the key
-      answers.push({ questionId, answer: value as string });
-    }
-  }
-
-  const { data: submission, error:dbInsertError } = await supabase.from("StudentsTests")
-    .insert({
-      studentId: studentId,
-      testId
-    })
-    .select(`submissionId`)
-    .single();
-
-  // FIXME: error checking
-  if (dbInsertError) {
-    console.log(dbInsertError);
-    return;
-  }
-
-  const { error:dbError } = await supabase.from("QuestionsAnswersStudents").insert(
-    answers.map((ans) => ({
-      submissionId : submission.submissionId,
-      questionId: ans.questionId,
-      answer: ans.answer,
-    })));
-
-  if (dbError) {
-    console.error("Error inserting answers:", dbError.message);
-    //add redirect to page with error 
-  }
-  
-  else {
-    redirect("/generic-pages/submission-success");
-  }
-}
-
+import { notFound } from "next/navigation";
 
 export default async function TestPage({ params }: { params: Promise<{ test: string }> }) {
-
   const supabase = await createClient();
-  const {test} = await params;
+  const { test } = await params;
   const testId = decodeURIComponent(test);
-  let isSubmitting = false;
+  const user = await getCurrentUser();
+  if (!user || !user.student) {
+    return notFound();
+  }
+
+  if (user.student.creditPoints < testCredits) {
+    return (
+      <Alert variant="destructive" className="bg-white">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Puncte credit insuficiente</AlertTitle>
+        <AlertDescription>Pentru a susține un test ai nevoie de {testCredits} puncte credit.</AlertDescription>
+        <AlertDescription>
+          Poți cumpăra mai multe puncte credite de pe {" "}
+          <Link href="/student/profile" className="font-medium hover:underline underline-offset-4">pagina de profil</Link>.
+        </AlertDescription>
+      </Alert>
+    )
+  }
   
-  const { data: testDetails, error } = await supabase
-      .from("PracticeTests")
-      .select("id, name, created_at, Teachers(id, firstname, lastname)")
-      .eq("id", testId)
-      .single();
+  const testQuery = await supabase
+    .from("PracticeTests")
+    .select(`
+      id,
+      name,
+      created_at,
+      teacher:Teachers!inner(id, firstname, lastname),
+      questions:QuestionsAnswers!inner(id, question, answer, points)
+    `)
+    .eq("id", testId)
+    .single();
 
-  const {data: testQuestions, error: testError} = await supabase 
-      .from("QuestionsAnswers")
-      .select("id, question, answer, points")
-      .eq("testId", testId);
-
-    // const { name: testName, created_at: createdAt, Teachers: teacher } = testDetails;
-    // const teacherName = teacher ? `${teacher.firstname} ${teacher.lastname}` : "Unknown Teacher"
-
+  if (testQuery.error) {
+    console.log(testQuery.error);
+    return notFound();
+  }
+  const testDetails = testQuery.data;
+  const testQuestions = testQuery.data.questions;
 
   return (
     <main className="container mx-auto mt-10 px-4">
@@ -101,24 +58,20 @@ export default async function TestPage({ params }: { params: Promise<{ test: str
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-800">Test: {testDetails?.name}</h1>
           <p className="text-lg text-gray-600">
-            Creat de:{" "}
-            {testDetails?.Teachers
-              ? `${testDetails.Teachers.firstname} ${testDetails.Teachers.lastname}`
-              : "Necunoscut"}
+            Creat de: {testDetails.teacher.firstname} {testDetails.teacher.lastname}
           </p>
         </div>
         <p className="text-gray-500 text-sm">
           Creat pe:{" "}
           <span className="font-semibold">
-            {new Date(testDetails?.created_at || "1970-01-01").toLocaleDateString()}
+            {formatDate(testDetails.created_at)}
           </span>
         </p>
       </div>
 
       {/* Form for Submitting Answers */}
       <form action={submitAnswersAction.bind(null, parseInt(testId))} className="space-y-8 mt-8">
-        {(testQuestions ?? []).length > 0  ? (
-          testQuestions?.map((question, index) => (
+        {testQuestions.map((question, index) => (
             <div
               key={question.id}
               className="flex flex-col md:flex-row items-start bg-gray-100 p-6 rounded-lg shadow"
@@ -148,12 +101,7 @@ export default async function TestPage({ params }: { params: Promise<{ test: str
                 </p>
               </div>
             </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-500">
-            Nu sunt întrebări disponibile pentru acest test.
-          </p>
-        )}
+        ))}
 
         {/* Submit Button */}
         <div className="text-center">
