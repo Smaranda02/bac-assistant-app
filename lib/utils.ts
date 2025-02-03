@@ -14,6 +14,17 @@ export function computeTestGrade(testData: TestSubmission, questionPoints: Array
   return gradedPoints * 100 / totalPoints;
 }
 
+export function getFileName(url: string | null) {
+  if (!url) {
+    return "Unknown file";
+  } 
+
+  const fullName =  url.split('/').pop() || "Unknown file";
+  const cleanName = fullName.split('.')[0];
+  const noSpaceFileName = cleanName.replace(/%20/g, "_");
+  return noSpaceFileName || "Unknown file";
+};
+
 export function formatDate(date: string) {
   const dateObj = new Date(date);
 
