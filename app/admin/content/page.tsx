@@ -32,7 +32,7 @@ export default async function Page() {
         </div>
       ))}
       {subjects?.length == 0 && (
-        <div className="text-muted-foreground my-2">Nu există nicio materie.</div>
+        <div className="text-muted-foreground text-center my-4">Nu există nicio materie.</div>
       )}
     </section>
   );
