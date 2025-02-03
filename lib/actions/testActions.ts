@@ -88,7 +88,7 @@ export async function submitAnswersAction(testId: number, formData: FormData) {
 
   const updateCreditsResult = await updateStudentCredits(user.student.id, -testCredits);
   if (!updateCreditsResult) {
-    return; // FIXME: redirect cu query params pentru erori
+    return redirect(`/student/take-test/${testId}?error=${encodeURIComponent("Nu s-au putut actualiza punctele credit. Te rugăm să reîncerci mai târziu.")}`);
   }
 
   const submissionInsert = await supabase.from("StudentsTests")
@@ -101,7 +101,7 @@ export async function submitAnswersAction(testId: number, formData: FormData) {
 
   if (submissionInsert.error) {
     console.log(submissionInsert.error);
-    return; // FIXME: redirect cu query params pentru erori
+    return redirect(`/student/take-test/${testId}?error=${encodeURIComponent("Nu s-au putut trimite răspunsurile. Te rugăm să reîncerci mai târziu.")}`);
   }
 
   const answersInsert = await supabase.from("QuestionsAnswersStudents").insert(
@@ -112,8 +112,8 @@ export async function submitAnswersAction(testId: number, formData: FormData) {
     })));
 
   if (answersInsert.error) {
-    console.error("Error inserting answers:", answersInsert.error);
-    return; // FIXME: redirect cu query params pentru erori
+    console.log("Error inserting answers:", answersInsert.error);
+    return redirect(`/student/take-test/${testId}?error=${encodeURIComponent("Nu s-au putut trimite răspunsurile. Te rugăm să reîncerci mai târziu.")}`);
   }
   
   return redirect("/student");
@@ -128,7 +128,6 @@ export type Grading = {
 export async function gradeTestAction(submissionId: number, grading: Array<Grading>) {
   const supabase = await createClient(); 
   
-  // FIXME: compute grade on backend for better security
   const submissionData = await getTestSubmission(submissionId);
   if (!submissionData) {
     return { error: "Parametri incorecți" };
@@ -145,12 +144,6 @@ export async function gradeTestAction(submissionId: number, grading: Array<Gradi
     })
     .eq("submissionId", submissionId);
 
-  // FIXME: error handling
-  // if (gradeQuery.error) {
-  //   return { error: "Testul a fost deja evaluat" };
-  // }
-
-  // FIXME: backend check for grading integrity (not already graded and invalid points)  
   const pending = grading.map(g => supabase.from("QuestionsAnswersStudents")
     .update({
       points: g.points,
@@ -164,7 +157,6 @@ export async function gradeTestAction(submissionId: number, grading: Array<Gradi
 
   // Check for error conditions
   if (results.some(r => r.status === "rejected" || r.value.error)) {
-    // FIXME: rolling back partial operation
     console.log(results);
     return { error: "Eroare la salvare evaluare" };
   }

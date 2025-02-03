@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 
 export type TestSubmission = {
   submissionId: number;
+  grade: number | null;
   test: {
     id: number;
     name: string;
@@ -27,7 +28,10 @@ export async function getTestData(testId: number) {
     .select(`
       id,
       name,
+      created_at,
+      subject:Subjects!inner(name),
       teacher:Teachers!inner(
+        id,
         firstname,
         lastname
       ),
@@ -42,7 +46,7 @@ export async function getTestData(testId: number) {
     .single();
   
   if (testQuery.error) {
-    console.log(testQuery.error)
+    console.log("Get test data", testQuery.error)
     return null;
   }
 
@@ -81,6 +85,7 @@ export async function getTestSubmission(submissionId: number): Promise<TestSubmi
     .select(`
       submissionId,
       submittedAt,
+      grade,
       test:PracticeTests!inner(
         id,
         name,

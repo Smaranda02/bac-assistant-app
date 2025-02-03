@@ -1,23 +1,41 @@
 import CancelTestModal from "@/components/cancelTestModel/CancelTestModel";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { submitAnswersAction } from "@/lib/actions/testActions";
 import { testCredits } from "@/lib/config";
+import { getTestData } from "@/lib/controllers/testController";
 import { getCurrentUser } from "@/lib/controllers/userController";
 import { formatDate } from "@/lib/utils";
-import { createClient } from "@/utils/supabase/server";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export default async function TestPage({ params }: { params: Promise<{ test: string }> }) {
-  const supabase = await createClient();
-  const { test } = await params;
-  const testId = decodeURIComponent(test);
+type PageParams = {
+  test: number;
+}
+type PageProps = {
+  params: Promise<PageParams>;
+  searchParams: Promise<{ error?: string }>;
+}
+
+export default async function TestPage({ params, searchParams }: PageProps) {
+  const { test: testId } = await params;
+  const { error: errorMessage } = await searchParams;
+
   const user = await getCurrentUser();
-  if (!user || !user.student) {
+  const testData = await getTestData(testId);
+
+  if (!user || !user.student || !testData) {
     return notFound();
   }
 
+  const testDetails = testData;
+  const testQuestions = testData.questions;
+
+  // Insufficient credits
   if (user.student.creditPoints < testCredits) {
     return (
       <Alert variant="destructive" className="bg-white">
@@ -31,92 +49,76 @@ export default async function TestPage({ params }: { params: Promise<{ test: str
       </Alert>
     )
   }
-  
-  const testQuery = await supabase
-    .from("PracticeTests")
-    .select(`
-      id,
-      name,
-      created_at,
-      teacher:Teachers!inner(id, firstname, lastname),
-      questions:QuestionsAnswers!inner(id, question, answer, points)
-    `)
-    .eq("id", testId)
-    .single();
-
-  if (testQuery.error) {
-    console.log(testQuery.error);
-    return notFound();
-  }
-  const testDetails = testQuery.data;
-  const testQuestions = testQuery.data.questions;
 
   return (
-    <main className="container mx-auto mt-10 px-4">
+    <>
+      {errorMessage && (
+        <Alert variant="destructive" className="bg-white mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>A apărut o eroare</AlertTitle>
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
       {/* Test Header */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Test: {testDetails?.name}</h1>
-          <p className="text-lg text-gray-600">
-            Creat de: {testDetails.teacher.firstname} {testDetails.teacher.lastname}
-          </p>
-        </div>
-        <p className="text-gray-500 text-sm">
-          Creat pe:{" "}
-          <span className="font-semibold">
-            {formatDate(testDetails.created_at)}
-          </span>
-        </p>
-      </div>
+      <Card className="shadow-lg">
+          <div className="flex items-center">
+            <CardHeader className="pb-4">
+              <CardTitle>
+                Test {testDetails.name}
+              </CardTitle>
+              <CardDescription>
+                Creat de {testDetails.teacher.firstname} {testDetails.teacher.lastname} la {formatDate(testDetails.created_at)}
+              </CardDescription>
+            </CardHeader>
+            <div className="ml-auto text-end pr-6 flex items-center gap-3">
+              <span>{testDetails.questions.length} exerciții</span>
+            </div>
+          </div>
+          <div className="mx-5 pb-4 flex gap-2 items-center">
+            <Badge variant="secondary">
+              {testDetails.subject.name}
+            </Badge>
+          </div>
+      </Card>
 
       {/* Form for Submitting Answers */}
-      <form action={submitAnswersAction.bind(null, parseInt(testId))} className="space-y-8 mt-8">
+      <form action={submitAnswersAction.bind(null, testId)} className="space-y-8 mt-8">
         {testQuestions.map((question, index) => (
-            <div
-              key={question.id}
-              className="flex flex-col md:flex-row items-start bg-gray-100 p-6 rounded-lg shadow"
-            >
-
-              <div className="flex-1 mb-4 md:mb-0">
-                <h2 className="text-lg font-semibold mb-2">
-                  Întrebare {index + 1}
-                </h2>
-                <p className="text-gray-800">{question.question}</p>
-
-                <input
+          <Card key={question.id} className="my-3 bg-gray-100">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                Exercițiul {index + 1}
+                <div className="flex items-center ml-auto text-base font-normal">
+                  <span>{question.points} puncte</span>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-3">
+                {question.question}
+              </div>
+              <div>
+                <Input
                   type="text"
                   name={`answer_${question.id}`} // Unique name for each input
                   placeholder="Scrie răspunsul aici..."
-                  className="mt-4 w-full p-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full"
                   required
                 />
               </div>
-
-              <div className="md:w-1/4 flex justify-end items-center">
-                <p className="text-sm font-medium text-gray-600">
-                  Puncte:{" "}
-                  <span className="text-xl font-bold text-blue-600">
-                    {question.points}
-                  </span>
-                </p>
-              </div>
-            </div>
+            </CardContent>
+          </Card>
         ))}
 
         {/* Submit Button */}
         <div className="text-center">
-          <button
-            type="submit"
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all"
-          >
-            Trimite răspunsurile
-          </button>
+          <Button type="submit">Trimite răspunsurile</Button>
         </div>
       </form>
 
-      <div className="text-center mt-8">
+      {/* <div className="text-center mt-8">
         <CancelTestModal></CancelTestModal>
-      </div>
-    </main>
+      </div> */}
+    </>
   );
 }
