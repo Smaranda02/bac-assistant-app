@@ -3,6 +3,7 @@ import { getChapterContent } from "@/lib/controllers/contentController";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { getFileName } from "@/lib/utils";
 
 type PageParams = {
   subjectId: number;
@@ -11,15 +12,6 @@ type PageParams = {
 type PageProps = {
   params: Promise<PageParams>;
 }
-
-const getFileName = (url: string | null) => {
-  if( !url ) return "Unknown file"
-
-  const fullName =  url.split('/').pop() || "Unknown file";
-  const cleanName = fullName.split('.')[0];
-  const noSpaceFileName = cleanName.replace(/%20/g, "_");
-  return noSpaceFileName || "Unknown file";
-};
 
 export default async function ChapterPage({ params }: PageProps) {
   const { subjectId, chapterId } = await params;

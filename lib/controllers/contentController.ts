@@ -38,7 +38,8 @@ export async function getChapterContent(chapterId: number) {
   const chapterQuery = await supabase.from("SubjectChapters")
     .select(`
       name,
-      documents:Materials(contentURL)
+      subjectId,
+      documents:Materials(id, contentURL)
     `)
     .eq("id", chapterId)
     .not("Materials.contentURL", "is", null)
