@@ -1,9 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export default function AdminDashboardPage() {
-  const router = useRouter();
-  router.replace("/admin/dashboard");
-  return null;
+  return redirect("/admin/dashboard");
 }
