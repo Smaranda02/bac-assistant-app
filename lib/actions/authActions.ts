@@ -120,11 +120,7 @@ export const studentSignUpAction = async (formData: FormData) => {
       return encodedRedirect("error", authPaths.studentSignUp, dbErrorStudents.message);
     }
 
-    return encodedRedirect(
-      "success",
-      authPaths.studentSignUp,
-      "Link de verificare trimis pe email.",
-    );
+    return redirect("/");
   }
 };
 
@@ -151,11 +147,7 @@ export const teacherSignUpAction = async (formData: FormData) => {
       return encodedRedirect("error", authPaths.teacherSignUp, dbErrorTeachers.message);
     }
 
-    return encodedRedirect(
-      "success",
-      authPaths.teacherSignUp,
-      "Link de verificare trimis pe email.",
-    );
+    return redirect("/");
   }
 };
 
