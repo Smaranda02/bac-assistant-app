@@ -30,8 +30,12 @@ export default async function TeacherHome() {
         <h3 className="font-bold text-lg">Teste de evaluat</h3>
         {submissions.map(s => (
           <div className="my-2 px-3 py-2 border rounded flex gap-2 items-center bg-white" key={`submission-${s.submissionId}`}>
-            <span>{s.test.name}</span>
-            <span className="text-muted-foreground">Trimis de {s.student.firstname} {s.student.lastname} la {formatDate(s.submittedAt)}</span>
+            <div className="mr-auto py-1">
+              <div className="font-bold">{s.test.name}</div>
+              <div className="text-sm text-muted-foreground" title={(new Date(s.submittedAt).toLocaleString())}>
+                Trimis de {s.student.firstname} {s.student.lastname} la {formatDate(s.submittedAt)}
+              </div>
+            </div>
             <Button size="sm" className="ml-auto" variant="secondary" asChild>
               <Link href={`/teacher/grade-test/${s.submissionId}/`}>
                 Evaluează
@@ -54,8 +58,12 @@ export default async function TeacherHome() {
         </div>
         {teacherTests.map(t => (
           <div className="my-2 px-3 py-2 border rounded flex gap-2 items-center bg-white" key={`test-${t.id}`}>
-            <span>{t.name}</span>
-            <span className="text-muted-foreground">Creat la {formatDate(t.created_at)}</span>
+            <div className="mr-auto py-1">
+              <div className="font-bold">{t.name}</div>
+              <div className="text-sm text-muted-foreground" title={(new Date(t.created_at).toLocaleString())}>
+                Creat la {formatDate(t.created_at)}
+              </div>
+            </div>
             <Button size="sm" className="ml-auto" variant="secondary" asChild>
               <Link href={`/teacher/view-test/${t.id}`}>
                 Vizualizare

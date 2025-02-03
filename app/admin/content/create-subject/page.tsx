@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createSubjectAction } from "@/lib/actions/contentActions";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -13,7 +14,7 @@ export default function AdminCreateDocumentPage() {
         </Link>
         <h2 className="text-xl font-bold mr-auto">Adaugă materie</h2>
       </div>
-      <form className="mx-10 mt-5">
+      <form action={createSubjectAction} className="mx-10 mt-5">
         <div className="mb-3 grid items-center gap-1.5">
           <Label htmlFor="name">Nume materie</Label>
           <Input placeholder="Nume materie" id="name" name="name" />

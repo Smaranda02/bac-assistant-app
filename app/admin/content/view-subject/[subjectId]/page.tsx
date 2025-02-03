@@ -1,24 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/server";
+import { getSubjectContent } from "@/lib/controllers/contentController";
+import { notFound } from "next/navigation";
 
-export default async function AdminViewSubjectPage({params}: {params: { subjectId: string } }) {
+type PageParams = {
+  subjectId: number;
+}
+type PageProps = {
+  params: Promise<PageParams>;
+}
 
-  const supabase = await createClient();
-  const subjectId = decodeURIComponent((await params).subjectId);
-
-  const { data: subject, error } = await supabase
-    .from("Subjects")
-    .select("name")
-    .eq("id", subjectId)
-    .single();
-
-  const { data: chapters, error: chaptersError } = await supabase
-    .from("SubjectChapters")
-    .select("id, name")
-    .eq("subjectId", subjectId)
-    ;
+export default async function AdminViewSubjectPage({ params }: PageProps) {
+  const { subjectId } = await params;
+  const subject = await getSubjectContent(subjectId);
+  if (!subject) {
+    return notFound();
+  }
 
   return (
     <section className="my-3">
@@ -26,14 +24,14 @@ export default async function AdminViewSubjectPage({params}: {params: { subjectI
         <Link href="/admin/content" className="mx-2 p-0.5 hover:bg-gray-200 rounded-full">
           <ChevronLeft></ChevronLeft>
         </Link>
-        <h2 className="text-xl font-bold mr-auto">Capitole pentru materia {subject?.name}</h2>
+        <h2 className="text-xl font-bold mr-auto">Capitole pentru materia {subject.name}</h2>
         <Button size="sm" variant="default" asChild>
           <Link href={`/admin/content/create-chapter/${subjectId}`}>
             Adaugă capitol
           </Link>
         </Button>
       </div>
-      {chapters?.map(c => (
+      {subject.chapters.map(c => (
         <div className="my-2 px-3 py-2 border rounded flex gap-2 items-center bg-white" key={`subject-${c.id}`}>
           <span>{c.name}</span>
           <Button size="sm" className="ml-auto" variant="secondary" asChild>
@@ -43,8 +41,8 @@ export default async function AdminViewSubjectPage({params}: {params: { subjectI
           </Button>
         </div>
       ))}
-      {chapters?.length == 0 && (
-        <div className="text-muted-foreground my-2">Nu există niciun capitol.</div>
+      {subject.chapters.length == 0 && (
+        <div className="text-muted-foreground text-center my-4">Nu există niciun capitol.</div>
       )}
     </section>
   )

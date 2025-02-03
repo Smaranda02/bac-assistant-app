@@ -13,7 +13,7 @@ export default async function GradeTestPage({ params, }: PageProps) {
   const { submissionId } = await params;
   const submissionData = await getTestSubmission(submissionId);
   
-  if (!submissionData) {
+  if (!submissionData || submissionData.grade !== null) {
     return notFound();
   }
 

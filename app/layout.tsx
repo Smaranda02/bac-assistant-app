@@ -1,9 +1,8 @@
 import HeaderAuth from "@/components/header-auth";
-import { ThemeSwitcher } from "@/components/layout/theme-switcher";
 import { GeistSans } from "geist/font/sans";
-import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import "./globals.css";
+import AppNavigationMenu from "@/components/layout/navigation-menu";
 
 export const metadata = {
   metadataBase: "http://localhost:3000",
@@ -25,6 +24,7 @@ export default function RootLayout({
               <div className="flex gap-5 items-center text-xl font-semibold">
                 <Link href={"/"}>BAC Assistant</Link>
               </div>
+              {/* <AppNavigationMenu/> */}
               <HeaderAuth />
             </div>
           </nav>

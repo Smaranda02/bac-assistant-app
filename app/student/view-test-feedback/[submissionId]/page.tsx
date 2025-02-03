@@ -80,7 +80,7 @@ export default async function ViewTestFeedbackPage({ params }: PageProps) {
               </Collapsible>
               <Collapsible className="border rounded my-2 bg-background" defaultOpen={true}>
                 <CollapsibleTrigger className="border-b w-full text-start py-1 px-3 flex justify-between">
-                  <span>Feedback</span>
+                  <span>Feedback din partea profesorului</span>
                   <span>+</span>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="py-2 px-3">
