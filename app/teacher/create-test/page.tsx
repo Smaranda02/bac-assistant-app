@@ -2,7 +2,7 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,17 +11,37 @@ import { AlertCircle, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-
-
-export default function CreateTestPage()
-{
+export default function CreateTestPage() {
   const [name, setName] = useState<string>("");
   const [questions, setQuestions] = useState<Array<TestQuestion>>([]);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  const addTestHandler = async () => {
+    setError(null);
+
+    const result = await createTestAction({
+      name,
+      questions
+    });
+
+    if (result.error) {
+      setError(result.error);
+    } else {
+      router.push("/teacher");
+    }
+  }
+  
+  const addQuestionHandler = () => {
+    setQuestions([...questions, {
+      question: "",
+      answer: "",
+      points: 0
+    }])
+  }
+
   return (
-    <div>
+    <>
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -31,56 +51,39 @@ export default function CreateTestPage()
           </AlertDescription>
         </Alert>
       )}
-      <div className="sticky top-0 flex gap-2 bg-background py-2 border-b">
-        <Input
-          placeholder="Nume test"
-          title="Nume test"
-          name="test-name"
-          id="test-name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <Button
-          title="Adaugă exercițiu"
-          variant="outline"
-          onClick={() => {
-            setQuestions([...questions, {
-              question: "",
-              answer: "",
-              points: 0
-            }])
-          }}
-        >
-          +
-        </Button>
-        <Button
-          onClick={async () => {
-            setError(null);
-
-            const result = await createTestAction({
-              name,
-              questions
-            });
-
-            if (result.error) {
-              setError(result.error)
-            } else {
-              router.push("/teacher")
-            }
-          }}
-        >
-          Adaugă test
-        </Button>
-      </div>
+      <Card className="shadow-lg sticky top-0 z-20">
+        <CardHeader className="pb-4">
+          <CardTitle>
+            Creare test
+          </CardTitle>
+          <CardDescription className="flex pt-4 gap-2">
+            <Input
+              placeholder="Nume test"
+              title="Nume test"
+              name="test-name"
+              id="test-name"
+              value={name}
+              required
+              onChange={(e) => setName(e.target.value)}
+            />
+            <Button variant="outline" onClick={addQuestionHandler}>
+              Adaugă exercițiu
+            </Button>
+            <Button onClick={addTestHandler}>
+              Adaugă test
+            </Button>
+          </CardDescription>
+        </CardHeader>
+      </Card>
       <div className="mt-5">
         {questions.map((question, index) => (
-          <Card key={index} className="my-4">
+          <Card key={index} className="my-3 bg-gray-100">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <span className="font-bold mt-4 mb-2">Exercițiul {index + 1}</span>
+                Exercițiul {index + 1}
                 <Button
                   size="icon"
-                  variant="outline"
+                  variant="secondary"
                   className="ml-auto"
                   onClick={() => {
                     setQuestions(questions.filter((_, i) => index != i))
@@ -91,7 +94,7 @@ export default function CreateTestPage()
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid w-full items-center gap-1.5 my-3">
+              <div className="grid w-full items-center gap-1.5 mb-3">
                 <Label htmlFor={`${index}-points`}>Punctaj</Label>
                 <Input
                   type="number"
@@ -101,6 +104,7 @@ export default function CreateTestPage()
                   name={`${index}-points`}
                   id={`${index}-points`}
                   value={isNaN(question.points) ? 0 : question.points}
+                  className="min-h-16"
                   onChange={(e) => {
                     setQuestions(questions.map((q, i) => (index == i) ? {...q, points: parseFloat(e.target.value)} : {...q}))
                   }}
@@ -113,18 +117,22 @@ export default function CreateTestPage()
                   name={`${index}-question`}
                   id={`${index}-question`}
                   value={question.question}
+                  required
+                  className="min-h-16"
                   onChange={(e) => {
                     setQuestions(questions.map((q, i) => (index == i) ? {...q, question: e.target.value} : {...q}))
                   }}
                 />
               </div>
-              <div className="grid w-full items-center gap-1.5 my-3">
+              <div className="grid w-full items-center gap-1.5 mt-3">
                 <Label htmlFor={`${index}-answer`}>Răspuns barem</Label>
                 <Textarea
                   placeholder="Răspuns"
                   name={`${index}-answer`}
                   id={`${index}-answer`}
                   value={question.answer}
+                  required
+                  className="min-h-16"
                   onChange={(e) => {
                     setQuestions(questions.map((q, i) => (index == i) ? {...q, answer: e.target.value} : {...q}))
                   }}
@@ -134,6 +142,6 @@ export default function CreateTestPage()
           </Card>
         ))}
       </div>
-    </div>
-  )
+    </>
+  );
 }
