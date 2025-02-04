@@ -39,7 +39,7 @@ export async function getChapterContent(chapterId: number) {
     .select(`
       name,
       subjectId,
-      documents:Materials(id, contentURL)
+      documents:Materials(id, name, contentURL)
     `)
     .eq("id", chapterId)
     .not("Materials.contentURL", "is", null)

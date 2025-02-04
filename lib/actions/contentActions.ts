@@ -73,6 +73,7 @@ export async function createMaterialAction(chapterId: number, formData: FormData
     .from('Materials')
     .insert({
       chapterId,
+      name: title,
       contentURL: urlData.publicUrl,
     });
 

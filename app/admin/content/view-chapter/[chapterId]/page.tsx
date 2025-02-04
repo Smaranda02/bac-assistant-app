@@ -33,7 +33,7 @@ export default async function AdminViewChapterPage({ params }: PageProps) {
       </div>
       {chapter.documents.map(d => (
         <div className="my-2 px-3 py-2 border rounded flex gap-2 items-center bg-white" key={`subject-${d.id}`}>
-          <span>{getFileName(d.contentURL)}</span>
+          <span>{d.name}</span>
           <Button size="sm" className="ml-auto" variant="secondary" asChild>
             <Link href={d.contentURL}>
               Vizualizare

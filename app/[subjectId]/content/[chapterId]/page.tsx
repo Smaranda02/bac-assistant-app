@@ -40,7 +40,7 @@ export default async function ChapterPage({ params }: PageProps) {
               >
               <div className="p-5 cursor-pointer bg-white border border-gray-300 rounded-lg hover:shadow-lg transition-all duration-300">
                 <h3 className="text-xl font-semibold text-gray-800">
-                  Document {getFileName(material.contentURL)}
+                  Document {material.name}
                 </h3>
                 <Button variant="secondary" className="w-full my-4 mb-0">Deschide documentul</Button>
               </div>
