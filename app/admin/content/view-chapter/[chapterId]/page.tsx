@@ -28,7 +28,7 @@ export default async function AdminViewChapterPage({ params }: PageProps) {
         </Link>
         <h2 className="text-xl font-bold mr-auto">Documente în capitolul {chapter.name}</h2>
         <Button size="sm" variant="default" asChild>
-          <Link href={`/admin/content/create-document/${chapter.subjectId}`}>
+          <Link href={`/admin/content/create-document/${chapterId}`}>
             Adaugă document
           </Link>
         </Button>
