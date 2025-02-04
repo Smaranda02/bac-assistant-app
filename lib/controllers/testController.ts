@@ -35,7 +35,7 @@ export async function getTestData(testId: number) {
         firstname,
         lastname
       ),
-      questions:QuestionsAnswers!inner(
+      questions:QuestionsAnswers(
         id,
         question,
         answer,
@@ -96,7 +96,7 @@ export async function getTestSubmission(submissionId: number): Promise<TestSubmi
         firstname,
         lastname
       ),
-      questions:QuestionsAnswersStudents!inner(
+      questions:QuestionsAnswersStudents(
         studentAnswer:answer,
         ...QuestionsAnswers!inner(
           id,

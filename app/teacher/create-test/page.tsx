@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createTestAction, TestQuestion } from "@/lib/actions/testActions";
 import { AlertCircle, XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 
 export default function CreateTestPage() {
   const [name, setName] = useState<string>("");
@@ -17,7 +17,8 @@ export default function CreateTestPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const addTestHandler = async () => {
+  const addTestHandler = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setError(null);
 
     const result = await createTestAction({
@@ -41,9 +42,9 @@ export default function CreateTestPage() {
   }
 
   return (
-    <>
+    <form onSubmit={addTestHandler}>
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="bg-white mb-3">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>A apărut o eroare</AlertTitle>
           <AlertDescription>
@@ -66,12 +67,8 @@ export default function CreateTestPage() {
               required
               onChange={(e) => setName(e.target.value)}
             />
-            <Button variant="outline" onClick={addQuestionHandler}>
-              Adaugă exercițiu
-            </Button>
-            <Button onClick={addTestHandler}>
-              Adaugă test
-            </Button>
+            <Button variant="outline" onClick={addQuestionHandler}>Adaugă exercițiu</Button>
+            <Button type="submit">Adaugă test</Button>
           </CardDescription>
         </CardHeader>
       </Card>
@@ -103,8 +100,9 @@ export default function CreateTestPage() {
                   placeholder="Punctaj"
                   name={`${index}-points`}
                   id={`${index}-points`}
-                  value={isNaN(question.points) ? 0 : question.points}
-                  className="min-h-16"
+                  value={isNaN(question.points) ? "" : question.points}
+                  required
+                  className="bg-white"
                   onChange={(e) => {
                     setQuestions(questions.map((q, i) => (index == i) ? {...q, points: parseFloat(e.target.value)} : {...q}))
                   }}
@@ -142,6 +140,6 @@ export default function CreateTestPage() {
           </Card>
         ))}
       </div>
-    </>
+    </form>
   );
 }

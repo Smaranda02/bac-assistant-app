@@ -21,31 +21,30 @@ export type TestQuestion = {
 
 export async function createTestAction(test: Test) {
   const supabase = await createClient();
-  const user = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
-  if (!user || !user.data.user) {
+  if (!user || !user.teacher) {
     return { error: "Utilizator invalid" };
   }
 
-  const teacher = await supabase.from("Teachers")
-    .select("id, Users!inner(email), subjectId")
-    .eq("Users.email", user.data.user.email!);
-
-  if (!teacher.data || teacher.data.length != 1) {
-    return { error: "Utilizator invalid" };
+  if (!test.name || test.name.length == 0) {
+    return { error: "Titlul este obligatoriu" };
   }
 
-  const {
-    error: dbError,
-    data: testData
-  } = await supabase.from("PracticeTests")
-    .insert([
-      {
-        name: test.name,
-        subjectId: teacher.data[0].subjectId,
-        teacherId: teacher.data[0].id
-      }
-    ])
+  if (test.questions.length === 0) {
+    return { error: "Testul trebuie să conțină măcar un exercițiu" };
+  }
+
+  if (test.questions.some(q => !q.answer || !q.question || isNaN(q.points))) {
+    return { error: "Câmpurile întrebării sunt obligatorii" };
+  }
+
+  const { error: dbError, data: testData } = await supabase.from("PracticeTests")
+    .insert({
+      name: test.name,
+      subjectId: user.teacher.subjectId,
+      teacherId: user.teacher.id
+    })
     .select("id");
 
   if (dbError || !testData || testData.length != 1) {
@@ -61,6 +60,7 @@ export async function createTestAction(test: Test) {
     );
 
   if (dbQuestionsError) {
+    console.log(dbQuestionsError);
     return { error: "Eroare la adăugarea testului" };
   }
 
