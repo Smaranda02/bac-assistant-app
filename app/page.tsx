@@ -2,10 +2,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default async function Index() {
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-600 text-white py-20">
+    <div className="flex flex-col">
+      <header className="bg-600 text-white bg-slate-700 rounded-md py-20">
         <div className="container mx-auto text-center">
           <h1 className="text-5xl font-bold mb-4">
             Bine ai venit la BAC Asisstant
@@ -21,9 +20,9 @@ export default async function Index() {
 
       <section className="py-20">
         <div className="container mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-8">Ce aducem</h2>
+          <h2 className="text-3xl font-bold mb-8">Ce aducem?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-6 border rounded-lg">
+            <div className="p-6 border rounded-lg bg-white">
               <h3 className="text-xl font-bold mb-4">
                 Feedback din partea profesorilor
               </h3>
@@ -32,7 +31,7 @@ export default async function Index() {
                 la clasă sau a profesorilor noștri
               </p>
             </div>
-            <div className="p-6 border rounded-lg">
+            <div className="p-6 border rounded-lg bg-white">
               <h3 className="text-xl font-bold mb-4">Materia ta. Mai simplu</h3>
               <p>
                 {" "}
@@ -40,7 +39,7 @@ export default async function Index() {
                 interactive și a testelor de autoevaluare
               </p>
             </div>
-            <div className="p-6 border rounded-lg">
+            <div className="p-6 border rounded-lg bg-white">
               <h3 className="text-xl font-bold mb-4"> Învățatul ca un joc</h3>
               <p>
                 {" "}
