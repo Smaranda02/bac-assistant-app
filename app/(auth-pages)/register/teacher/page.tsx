@@ -1,19 +1,15 @@
-'use client';
-
 import { teacherSignUpAction } from "@/lib/actions/authActions";
 import { FormMessage, Message } from "@/components/forms/form-message";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { getSubjects } from "@/lib/controllers/contentController";
+import { Select, SelectItem, SelectTrigger, SelectValue, SelectContent } from "@/components/ui/select";
 
-export default function Signup(props: { searchParams: Promise<Message> }) {
-  const [searchParams, setSearchParams] = useState<Message | null>(null);
-
-  useEffect(() => {
-    props.searchParams.then(setSearchParams);
-  }, [props.searchParams]);
+export default async function Signup(props: { searchParams: Promise<Message> }) {
+  const searchParams = await props.searchParams;
 
   if (searchParams && "message" in searchParams) {
     return (
@@ -23,14 +19,11 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
     );
   }
 
-  const subjects = {
-    1 : 'Matematica',
-    2 : 'Informatica',
-  } // TODO: should be fetched from the backend
+  const subjects = await getSubjects();
 
   return (
-    <>
-      <form className="flex flex-col min-w-64 max-w-64 mx-auto">
+    <Card className="p-4">
+      <form className="flex flex-col min-w-96 mx-auto">
         <h1 className="text-2xl font-medium">Înregistrează-te ca profesor</h1>
         <p className="text-sm text text-foreground">
           Ai deja un cont?{" "}
@@ -45,14 +38,17 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
           <Label htmlFor="firstName">Prenume</Label>
           <Input name="firstName" placeholder="Prenumele tău" required />
 
-          <Label htmlFor="subject"> Materie </Label>
-          <select name="subject" required>
-            {Object.entries(subjects).map(([key, value]) => (
-              <option key={key} value={key}>
-                {value}
-              </option>
-            ))}
-          </select>
+          <Label htmlFor="subject">Materie</Label>
+          <Select name="subject" required>
+            <SelectTrigger>
+              <SelectValue placeholder="Materie" />
+            </SelectTrigger>
+            <SelectContent>
+              {subjects.map(s => (
+                <SelectItem value={s.id.toString()} key={s.id}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <Label htmlFor="email">Email</Label>
           <Input name="email" placeholder="profesorul@exemplu.com" required />
@@ -77,6 +73,6 @@ export default function Signup(props: { searchParams: Promise<Message> }) {
           </SubmitButton>
         </div>
       </form>
-    </>
+    </Card>
   );
 }
