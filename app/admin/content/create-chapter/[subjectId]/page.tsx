@@ -3,8 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { getSubjectById } from "@/lib/controllers/subjectController";
 import { createChapterAction } from "@/lib/actions/contentActions";
+import { getSubjectContent } from "@/lib/controllers/contentController";
+import { notFound } from "next/navigation";
 
 type PageParams = {
   subjectId: number;
@@ -15,7 +16,10 @@ type PageProps = {
 
 export default async function AdminCreateChapterPage({ params }: PageProps) {
   const { subjectId } = await params;
-  const subject = await getSubjectById(subjectId);
+  const subject = await getSubjectContent(subjectId);
+  if (!subject) {
+    return notFound();
+  }
 
   return (
     <section className="my-3">
@@ -23,7 +27,7 @@ export default async function AdminCreateChapterPage({ params }: PageProps) {
         <Link href={`/admin/content/view-subject/${subjectId}`} className="mx-2 p-0.5 hover:bg-gray-200 rounded-full">
           <ChevronLeft></ChevronLeft>
         </Link>
-        <h2 className="text-xl font-bold mr-auto">Adaugă capitol în materia {subject}</h2>
+        <h2 className="text-xl font-bold mr-auto">Adaugă capitol în materia {subject.name}</h2>
       </div>
       <form action={createChapterAction.bind(null, subjectId)} className="mx-10 mt-5">
         <div className="mb-3 grid items-center gap-1.5">

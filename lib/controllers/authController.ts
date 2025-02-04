@@ -5,7 +5,7 @@ export namespace Roles {
 }
 
 export type UserMetadata = {
-  role: 2;
+  role: typeof Roles.Teacher;
   firstName: string;
   lastName: string;
   subject: number;
