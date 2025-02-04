@@ -28,7 +28,7 @@ export default async function UserMenu() {
         <DropdownMenuLabel>Contul meu</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {userData.role != Roles.Admin && (  
-          <Link href={`/${getUserHome(userData.role)}/profile`}>
+          <Link href={`${getUserHome(userData.role)}/profile`}>
             <DropdownMenuItem className="cursor-pointer">
               <User />    
               <span>Profil</span>
