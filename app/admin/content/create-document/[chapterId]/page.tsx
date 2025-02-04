@@ -30,7 +30,7 @@ export default async function AdminCreateDocumentPage({ params }: PageProps) {
         </Link>
         <h2 className="text-xl font-bold mr-auto">Încarcă document în capitolul {chapter.name}</h2>
       </div>
-      <form action={createMaterialAction.bind(null, chapterId)} className="mx-10 mt-5">
+      <form action={createMaterialAction.bind(null, chapterId)} className="mx-10 mt-5 bg-white p-6 border rounded">
         <input type="hidden" name="chapterId" value={chapterId} />
         <div className="mb-3 grid items-center gap-1.5">
           <Label htmlFor="title">Titlu</Label>

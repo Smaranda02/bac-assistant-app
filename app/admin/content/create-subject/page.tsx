@@ -14,10 +14,10 @@ export default function AdminCreateDocumentPage() {
         </Link>
         <h2 className="text-xl font-bold mr-auto">Adaugă materie</h2>
       </div>
-      <form action={createSubjectAction} className="mx-10 mt-5">
+      <form action={createSubjectAction} className="mx-10 mt-5 bg-white p-6 border rounded">
         <div className="mb-3 grid items-center gap-1.5">
           <Label htmlFor="name">Nume materie</Label>
-          <Input placeholder="Nume materie" id="name" name="name" />
+          <Input placeholder="Nume materie" id="name" name="name" required />
         </div>
         <Button type="submit">Adaugă materie</Button>
       </form>

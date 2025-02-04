@@ -29,7 +29,7 @@ export default async function AdminCreateChapterPage({ params }: PageProps) {
         </Link>
         <h2 className="text-xl font-bold mr-auto">Adaugă capitol în materia {subject.name}</h2>
       </div>
-      <form action={createChapterAction.bind(null, subjectId)} className="mx-10 mt-5">
+      <form action={createChapterAction.bind(null, subjectId)} className="mx-10 mt-5 bg-white p-6 border rounded">
         <div className="mb-3 grid items-center gap-1.5">
           <Label htmlFor="name">Nume capitol</Label>
           <Input placeholder="Nume capitol" id="name" name="name" required />

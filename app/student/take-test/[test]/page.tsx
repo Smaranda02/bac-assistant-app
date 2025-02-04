@@ -102,7 +102,7 @@ export default async function TestPage({ params, searchParams }: PageProps) {
                   type="text"
                   name={`answer_${question.id}`} // Unique name for each input
                   placeholder="Scrie răspunsul aici..."
-                  className="w-full"
+                  className="w-full bg-white"
                   required
                 />
               </div>

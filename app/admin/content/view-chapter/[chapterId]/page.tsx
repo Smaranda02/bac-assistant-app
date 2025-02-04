@@ -20,7 +20,7 @@ export default async function AdminViewChapterPage({ params }: PageProps) {
 
   return (
     <section className="my-3">
-      <div className="flex items-center mb-2">
+      <div className="flex items-center mb-2 h-9">
         <Link href={`/admin/content/view-subject/${chapter.subjectId}`} className="mx-2 p-0.5 hover:bg-gray-200 rounded-full">
           <ChevronLeft></ChevronLeft>
         </Link>

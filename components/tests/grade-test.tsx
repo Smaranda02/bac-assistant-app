@@ -9,6 +9,8 @@ import { useState } from "react";
 import { gradeTestAction, Grading } from "@/lib/actions/testActions";
 import { computeTestGrade } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { AlertCircle } from "lucide-react";
 
 type Props = {
   submissionData: TestSubmission
@@ -21,12 +23,22 @@ export default function GradeTest({ submissionData } : Props) {
     feedback: ''
   })));
   const [isSubmitting, setSubmitting] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const gradedQuestions = grading.reduce((total, g) => !isNaN(g.points) ? total + 1 : total, 0);
   const testGrade = computeTestGrade(submissionData, grading);
   const router = useRouter();
 
   return (
     <>
+      {error && (
+        <Alert variant="destructive" className="bg-white mb-3">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>A apărut o eroare</AlertTitle>
+          <AlertDescription>
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
       <Card className="shadow-lg sticky top-0 flex items-center z-20">
         <CardHeader>
             <CardTitle>
@@ -43,11 +55,11 @@ export default function GradeTest({ submissionData } : Props) {
             disabled={gradedQuestions !== submissionData.questions.length || isSubmitting}
             onClick={async () => {
               setSubmitting(true);
+              setError(null);
               const resp = await gradeTestAction(submissionData.submissionId, grading);
               if (resp.error) {
                 setSubmitting(false);
-                console.error(resp.error);
-                // FIXME: show error
+                setError(resp.error);
               } else {
                 router.push("/teacher");
               }
@@ -71,6 +83,8 @@ export default function GradeTest({ submissionData } : Props) {
                     step="0.01"
                     value={isNaN(grading[i].points) ? '' : grading[i].points}
                     disabled={isSubmitting}
+                    required
+                    className="bg-white"
                     onChange={(e) => {
                       const value = parseFloat(e.target.value);
                       if (isNaN(value) || value <= q.points) {
@@ -112,6 +126,7 @@ export default function GradeTest({ submissionData } : Props) {
                 placeholder="Observații suplimentare"
                 disabled={isSubmitting}
                 value={grading[i].feedback}
+                className="bg-white"
                 onChange={(e) => {
                   setGrading(grading.map((g, j) => i == j ? {...g, feedback: e.target.value} : {...g}))
                 }}
