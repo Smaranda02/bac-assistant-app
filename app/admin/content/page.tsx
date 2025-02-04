@@ -1,15 +1,12 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/server";
+import { DeleteDialog } from "@/components/dialogs/delete-dialog";
+import { deleteSubjectAction } from "@/lib/actions/contentActions";
+import { getSubjects } from "@/lib/controllers/contentController";
 
 
 export default async function Page() {
-
-  const supabase = await createClient();  
-
-  const { data: subjects, error } = await supabase
-  .from("Subjects")
-  .select("*");
+  const subjects = await getSubjects();
 
   return (
     <section className="my-3">
@@ -26,9 +23,17 @@ export default async function Page() {
           <span>{s.name}</span>
           <Button size="sm" className="ml-auto" variant="secondary" asChild>
             <Link key={s.id} href={`/admin/content/view-subject/${s.id}`}>
-              Capitole
+              Vezi Capitole
             </Link>
           </Button>
+          <Button size="sm" className="" variant="secondary">
+            <Link href={`/admin/content/edit-subject/${s.id}`}>
+              Editează
+            </Link>
+          </Button>
+          <DeleteDialog itemName={`materia ${s.name}`} action={deleteSubjectAction.bind(null, s.id)}>
+            Șterge
+          </DeleteDialog>
         </div>
       ))}
       {subjects?.length == 0 && (

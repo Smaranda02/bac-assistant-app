@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/forms/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createSubjectAction } from "@/lib/actions/contentActions";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
-export default function AdminCreateDocumentPage() {
+export default function AdminCreateSubjectPage() {
   return (
     <section className="my-3">
       <div className="flex items-center mb-2 h-9">
@@ -19,7 +19,7 @@ export default function AdminCreateDocumentPage() {
           <Label htmlFor="name">Nume materie</Label>
           <Input placeholder="Nume materie" id="name" name="name" required />
         </div>
-        <Button type="submit">Adaugă materie</Button>
+        <SubmitButton type="submit">Adaugă materie</SubmitButton>
       </form>
     </section>
   );

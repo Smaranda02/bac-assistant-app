@@ -25,7 +25,7 @@ export default async function AdminCreateDocumentPage({ params }: PageProps) {
   return (
     <section className="my-3">
       <div className="flex items-center mb-2 h-9">
-        <Link href={`/admin/content/view-chapter/${1}`} className="mx-2 p-0.5 hover:bg-gray-200 rounded-full">
+        <Link href={`/admin/content/view-chapter/${chapterId}`} className="mx-2 p-0.5 hover:bg-gray-200 rounded-full">
           <ChevronLeft></ChevronLeft>
         </Link>
         <h2 className="text-xl font-bold mr-auto">Încarcă document în capitolul {chapter.name}</h2>

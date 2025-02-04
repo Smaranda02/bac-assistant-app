@@ -38,7 +38,7 @@ export default async function AdminViewChapterPage({ params }: PageProps) {
           <span>{d.name}</span>
           <Button size="sm" className="ml-auto" variant="secondary" asChild>
             <Link href={d.contentURL}>
-              Vizualizare
+              Deschide
             </Link>
           </Button>
           <Button size="sm" className="" variant="secondary">

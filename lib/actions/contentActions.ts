@@ -2,7 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { notFound, redirect } from "next/navigation";
-import { getChapterContent, getDocument } from "../controllers/contentController";
+import { getChapterContent, getDocument, getSubjectContent } from "../controllers/contentController";
 import { revalidatePath } from "next/cache";
 
 export async function createSubjectAction(formData: FormData) {
@@ -20,6 +20,44 @@ export async function createSubjectAction(formData: FormData) {
   }
 
   return redirect("/admin/content");
+}
+
+export async function editSubjectAction(subjectId: number, formData: FormData) {
+  const supabase = await createClient();
+  const name = formData.get('name') as string;
+
+  const subjectUpdate = await supabase.from("Subjects")
+    .update({
+      name
+    })
+    .eq("id", subjectId)
+    .select("*")
+    .single();
+  
+  if (subjectUpdate.error) {
+    console.log("Update subject", subjectUpdate.error);
+    return redirect(`/admin/content/edit-subject/${subjectId}`);
+  }
+
+  revalidatePath("/admin/content");
+  return redirect("/admin/content");
+}
+
+export async function deleteSubjectAction(subjectId: number) {
+  const supabase = await createClient();
+  const subject = await getSubjectContent(subjectId);
+
+  if (!subject) {
+    return notFound();
+  }
+  
+  const subjectDelete = await supabase.from("Subjects").delete().eq("id", subjectId);
+  if (subjectDelete.error) {
+    console.log("Subject delete", subjectDelete.error);
+    return;
+  }
+
+  return revalidatePath("/admin/content");
 }
 
 export async function createChapterAction(subjectId: number, formData: FormData) {
