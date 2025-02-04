@@ -1,4 +1,6 @@
+import { DeleteDialog } from "@/components/dialogs/delete-dialog";
 import { Button } from "@/components/ui/button";
+import { deleteMaterialAction } from "@/lib/actions/contentActions";
 import { getChapterContent } from "@/lib/controllers/contentController";
 import { getFileName } from "@/lib/utils";
 import { ChevronLeft } from "lucide-react";
@@ -39,6 +41,14 @@ export default async function AdminViewChapterPage({ params }: PageProps) {
               Vizualizare
             </Link>
           </Button>
+          <Button size="sm" className="" variant="secondary">
+            <Link href={`/admin/content/edit-document/${d.id}`}>
+              Editează
+            </Link>
+          </Button>
+          <DeleteDialog itemName={`documentul ${d.name}`} action={deleteMaterialAction.bind(null, d.id)}>
+            Șterge
+          </DeleteDialog>
         </div>
       ))}
       {chapter.documents.length == 0 && (

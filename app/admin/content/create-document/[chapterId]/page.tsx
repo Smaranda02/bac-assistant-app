@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronLeft } from "lucide-react";
@@ -6,6 +5,7 @@ import Link from "next/link";
 import { createMaterialAction } from "@/lib/actions/contentActions";
 import { getChapterContent } from "@/lib/controllers/contentController";
 import { notFound } from "next/navigation";
+import { SubmitButton } from "@/components/forms/submit-button";
 
 type PageParams = {
   chapterId: number;
@@ -34,7 +34,7 @@ export default async function AdminCreateDocumentPage({ params }: PageProps) {
         <input type="hidden" name="chapterId" value={chapterId} />
         <div className="mb-3 grid items-center gap-1.5">
           <Label htmlFor="title">Titlu</Label>
-          <Input type="text" name="title" id="title" required />
+          <Input type="text" name="title" id="title" />
         </div>
 
         <div className="mb-3 grid items-center gap-1.5">
@@ -42,7 +42,7 @@ export default async function AdminCreateDocumentPage({ params }: PageProps) {
           <Input type="file" name="content" id="content" required />
         </div>
 
-        <Button type="submit">Salvează documentul</Button>
+        <SubmitButton type="submit">Salvează documentul</SubmitButton>
       </form>
     </section>
   );

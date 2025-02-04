@@ -35,7 +35,7 @@ export function DeleteDialog({
           {/* <DialogClose asChild> */}
             <form action={action}>
             {/* <Button type="submit" variant="destructive" size="sm" className={pending ? "bg-red-300" : "" } aria-disabled={pending} disabled={pending}>Șterge</Button> */}
-            <SubmitButton variant="destructive">Șterge</SubmitButton>
+            <SubmitButton variant="destructive" size="sm">Șterge</SubmitButton>
             </form>
           {/* </DialogClose> */}
         </DialogFooter>

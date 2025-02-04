@@ -2,7 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { notFound, redirect } from "next/navigation";
-import { getChapterContent } from "../controllers/contentController";
+import { getChapterContent, getDocument } from "../controllers/contentController";
 import { revalidatePath } from "next/cache";
 
 export async function createSubjectAction(formData: FormData) {
@@ -79,7 +79,7 @@ export async function deleteChapterAction(chapterId: number) {
 }
 
 export async function createMaterialAction(chapterId: number, formData: FormData) { 
-  const title = formData.get('title') as string;
+  let title = formData.get('title')?.toString();
   const content = formData.get('content') as File;
   const errorRedirectPath = `/admin/content/create-material/${chapterId}`;
 
@@ -108,6 +108,10 @@ export async function createMaterialAction(chapterId: number, formData: FormData
     .from('LearningMaterials')
     .getPublicUrl(storageData.path)
 
+  if (!title) {
+    title = content.name;
+  }
+
   // add file information into database
   const { error: dbError } = await supabase
     .from('Materials')
@@ -123,4 +127,43 @@ export async function createMaterialAction(chapterId: number, formData: FormData
   }
 
   return redirect(`/admin/content/view-chapter/${chapterId}`);
+}
+
+export async function editMaterialAction(documentId: number, formData: FormData) {
+  const supabase = await createClient();
+  const name = formData.get('title') as string;
+
+  const documentUpdate = await supabase.from("Materials")
+    .update({
+      name
+    })
+    .eq("id", documentId)
+    .select("*")
+    .single();
+  
+  if (documentUpdate.error) {
+    console.log("Update chapter", documentUpdate.error);
+    return redirect(`/admin/content/edit-document/${documentId}`);
+  }
+
+  revalidatePath(`/admin/content/view-chapter/${documentUpdate.data.chapterId}`);
+  return redirect(`/admin/content/view-chapter/${documentUpdate.data.chapterId}`);
+}
+
+export async function deleteMaterialAction(documentId: number) {
+  const supabase = await createClient();
+  const document = await getDocument(documentId);
+
+  if (!document) {
+    return notFound();
+  }
+
+  const documentDelete = await supabase.from("Materials").delete().eq("id", documentId);
+
+  if (documentDelete.error) {
+    console.log("Document delete", documentDelete.error);
+    return;
+  }
+
+  return revalidatePath(`/admin/content/view-chapter/${document.chapterId}`);
 }

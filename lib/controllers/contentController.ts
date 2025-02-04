@@ -52,3 +52,15 @@ export async function getChapterContent(chapterId: number) {
 
   return chapterQuery.data;
 }
+
+export async function getDocument(documentId: number) {
+  const supabase = await createClient();
+  const documentQuery = await supabase.from("Materials").select("*").eq("id", documentId).single();
+
+  if (documentQuery.error) {
+    console.log("Get document", documentQuery.error);
+    return null;
+  }
+
+  return documentQuery.data;
+}
