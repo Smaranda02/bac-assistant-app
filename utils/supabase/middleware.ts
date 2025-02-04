@@ -1,4 +1,5 @@
 import { Database } from "@/database.types";
+import { checkPermission, getUserHome, UserMetadata } from "@/lib/controllers/authController";
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -37,29 +38,19 @@ export const updateSession = async (request: NextRequest) => {
   // https://supabase.com/docs/guides/auth/server-side/nextjs
   const user = await supabase.auth.getUser();
 
-  // protect all routes except authentication ones
-  const permittedRoutes = [
-    '/',
-    '/forgot-password',
-    '/sign-in',
-    '/register'
-  ];
-
-  if (!permittedRoutes.some(route => request.nextUrl.pathname.startsWith(route)) && user.error) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
-  }
-
-  // redirect logged in user to their home
-  if (request.nextUrl.pathname === "/" && user) {
-    const userType = user.data.user?.user_metadata.role?.toLowerCase();
-    if (userType === "student") {
-      return NextResponse.redirect(new URL("/student", request.url));
-    } else if (userType === "admin") {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    } else if (userType === "teacher") {
-      return NextResponse.redirect(new URL("/teacher", request.url));
+  // Check if user logged in
+  if (user.error) {
+    // Redirect to sign in page on not permitted routes
+    if (!checkPermission(request.nextUrl.pathname) && user.error) {
+      return NextResponse.redirect(new URL("/sign-in", request.url));
     }
-
+  } else {
+    // Redirect logged in user to their home and role permission checking
+    const userMeta = user.data.user?.user_metadata as UserMetadata;
+    if (request.nextUrl.pathname === "/" || !checkPermission(request.nextUrl.pathname, userMeta.role)) {
+      const userHome = getUserHome(userMeta.role);
+      return NextResponse.redirect(new URL(userHome, request.url));
+    }
   }
 
   return response;

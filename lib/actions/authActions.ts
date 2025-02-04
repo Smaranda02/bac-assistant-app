@@ -4,6 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Roles, UserMetadata } from "../controllers/authController";
 
 const authPaths = {
   signIn: "/sign-in",
@@ -13,7 +14,7 @@ const authPaths = {
   forgot: "/forgot-password"
 }
 
-const signUpUser = async (formData: FormData, role: string, redirectPath: string, additionalData: object = {}) => {
+const signUpUser = async (formData: FormData, roleId: number, redirectPath: string, additionalData: { subject?: number } = {}) => {
   const firstName = formData.get("firstName")?.toString();
   const lastName = formData.get("lastName")?.toString();
   const email = formData.get("email")?.toString();
@@ -21,6 +22,14 @@ const signUpUser = async (formData: FormData, role: string, redirectPath: string
   const confirmPassword = formData.get("confirmPassword")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
+
+  if (!firstName || !lastName) {
+    return encodedRedirect(
+      "error",
+      redirectPath,
+      "Numele și prenumele sunt obligatorii",
+    );
+  }
 
   if (!email || !password) {
     return encodedRedirect(
@@ -56,20 +65,10 @@ const signUpUser = async (formData: FormData, role: string, redirectPath: string
     );
   }
 
-  const { data: roleData, error: roleError } = await supabase
-    .from("Roles")
-    .select("id")
-    .eq("name", role);
-
-  if (roleError || !roleData) {
-    console.error(roleError?.message || "Role not found");
-    return encodedRedirect("error", redirectPath, roleError?.message || "Role not found");
-  }
-
   const { error: dbErrorUsers } = await supabase.from("Users").insert([
     {
       email: email,
-      roleId: roleData?.[0].id,
+      roleId: roleId
     }
   ]);
 
@@ -78,20 +77,26 @@ const signUpUser = async (formData: FormData, role: string, redirectPath: string
     return encodedRedirect("error", redirectPath, dbErrorUsers.message);
   }
 
-  const userId = await supabase.from("Users").select("id").eq("email", email);
-  console.log(userId);
+  const userId = await supabase.from("Users").select("id").eq("email", email).single();
+
+  const userMedatada: UserMetadata = {
+    role: roleId,
+    firstName: firstName,
+    lastName: lastName,
+    ...additionalData
+  }
 
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
-      data: { role: role, firstName: firstName, lastName: lastName, ...additionalData },
+      data: userMedatada
     },
   });
 
   if (error) {
-    console.error(error.code + " " + error.message);
+    console.log(error.code + " " + error.message);
     return encodedRedirect("error", redirectPath, error.message);
   }
 
@@ -101,7 +106,7 @@ const signUpUser = async (formData: FormData, role: string, redirectPath: string
 export const studentSignUpAction = async (formData: FormData) => {
   const firstName = formData.get("firstName")?.toString();
   const lastName = formData.get("lastName")?.toString();
-  const userId = await signUpUser(formData, "Student", authPaths.studentSignUp);
+  const userId = await signUpUser(formData, Roles.Student, authPaths.studentSignUp);
 
   if (userId && userId.data && firstName && lastName) {
     const supabase = await createClient();
@@ -111,7 +116,7 @@ export const studentSignUpAction = async (formData: FormData) => {
         firstname: firstName,
         lastname: lastName,
         creditPoints: 0,
-        userId: userId.data[0].id,
+        userId: userId.data.id,
       }
     ]);
 
@@ -128,7 +133,10 @@ export const teacherSignUpAction = async (formData: FormData) => {
   const subjectId = formData.get("subject") ? Number(formData.get("subject")) : null;
   const firstName = formData.get("firstName")?.toString();
   const lastName = formData.get("lastName")?.toString();
-  const userId = await signUpUser(formData, "Teacher", authPaths.teacherSignUp, { subject: subjectId });
+  if (!subjectId) {
+    return encodedRedirect("error", authPaths.teacherSignUp, "Eroare la sign up ");
+  }
+  const userId = await signUpUser(formData, Roles.Teacher, authPaths.teacherSignUp, { subject: subjectId });
 
   if (userId && userId.data && firstName && lastName && subjectId) {
     const supabase = await createClient();
@@ -138,12 +146,12 @@ export const teacherSignUpAction = async (formData: FormData) => {
         firstname: firstName,
         lastname: lastName,
         subjectId: subjectId,
-        userId: userId.data[0].id,
+        userId: userId.data.id,
       }
     ]);
 
     if (dbErrorTeachers) {
-      console.error(dbErrorTeachers.message);
+      console.log(dbErrorTeachers.message);
       return encodedRedirect("error", authPaths.teacherSignUp, dbErrorTeachers.message);
     }
 

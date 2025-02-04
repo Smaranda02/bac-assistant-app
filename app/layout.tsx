@@ -1,4 +1,4 @@
-import HeaderAuth from "@/components/header-auth";
+import HeaderAuth from "@/components/layout/header-auth";
 import { GeistSans } from "geist/font/sans";
 import Link from "next/link";
 import "./globals.css";

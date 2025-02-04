@@ -1,10 +1,9 @@
-import { signOutAction } from "@/lib/actions/authActions";
 import Link from "next/link";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { createClient } from "@/utils/supabase/server";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { DropdownMenuGroup } from "@radix-ui/react-dropdown-menu";
-import UserMenu from "./layout/user-menu";
+import UserMenu from "./user-menu";
 
 export default async function AuthButton() {
   const supabase = await createClient();
@@ -21,19 +20,15 @@ export default async function AuthButton() {
     <div className="flex gap-2">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline">Înregistrare</Button>
+          <Button variant="outline" size="sm">Înregistrare</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="">
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              {/* <Button asChild size="sm"> */}
-                <Link href="/register/student" className="w-full">Sunt elev</Link>
-              {/* </Button> */}
+            <DropdownMenuItem asChild className="cursor-pointer">
+              <Link href="/register/student" className="w-full">Sunt elev</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              {/* <Button asChild size="sm"> */}
-                <Link href="/register/teacher" className="w-full">Sunt profesor</Link>
-              {/* </Button> */}
+            <DropdownMenuItem asChild className="cursor-pointer">
+              <Link href="/register/teacher" className="w-full">Sunt profesor</Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

@@ -8,7 +8,7 @@ const components: { title: string; href: string }[] = [
   },
   {
     title: "Informatică",
-    href: "/1/content"
+    href: "/2/content"
   }
 ]
 
