@@ -3,6 +3,8 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { getSubjectContent } from "@/lib/controllers/contentController";
 import { notFound } from "next/navigation";
+import { deleteChapterAction } from "@/lib/actions/contentActions";
+import { DeleteDialog } from "@/components/dialogs/delete-dialog";
 
 type PageParams = {
   subjectId: number;
@@ -36,9 +38,17 @@ export default async function AdminViewSubjectPage({ params }: PageProps) {
           <span>{c.name}</span>
           <Button size="sm" className="ml-auto" variant="secondary" asChild>
             <Link href={`/admin/content/view-chapter/${c.id}`}>
-              Documente
+              Vezi Documente
             </Link>
           </Button>
+          <Button size="sm" className="" variant="secondary">
+            <Link href={`/admin/content/edit-chapter/${c.id}`}>
+              Editează
+            </Link>
+          </Button>
+          <DeleteDialog itemName={`capitolul ${c.name}`} action={deleteChapterAction.bind(null, c.id)}>
+            Șterge
+          </DeleteDialog>
         </div>
       ))}
       {subject.chapters.length == 0 && (

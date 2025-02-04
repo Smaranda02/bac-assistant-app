@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
@@ -6,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import { createChapterAction } from "@/lib/actions/contentActions";
 import { getSubjectContent } from "@/lib/controllers/contentController";
 import { notFound } from "next/navigation";
+import { SubmitButton } from "@/components/forms/submit-button";
 
 type PageParams = {
   subjectId: number;
@@ -34,7 +34,7 @@ export default async function AdminCreateChapterPage({ params }: PageProps) {
           <Label htmlFor="name">Nume capitol</Label>
           <Input placeholder="Nume capitol" id="name" name="name" required />
         </div>
-        <Button type="submit">Adaugă capitol</Button>
+        <SubmitButton>Adaugă capitol</SubmitButton>
       </form>
     </section>
   );

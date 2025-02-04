@@ -1,7 +1,9 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { getChapterContent } from "../controllers/contentController";
+import { revalidatePath } from "next/cache";
 
 export async function createSubjectAction(formData: FormData) {
   const supabase = await createClient();
@@ -36,6 +38,44 @@ export async function createChapterAction(subjectId: number, formData: FormData)
   }
 
   return redirect(`/admin/content/view-subject/${subjectId}`);
+}
+
+export async function editChapterAction(chapterId: number, formData: FormData) {
+  const supabase = await createClient();
+  const name = formData.get('name') as string;
+
+  const chapterUpdate = await supabase.from("SubjectChapters")
+    .update({
+      name
+    })
+    .eq("id", chapterId)
+    .select("*")
+    .single();
+  
+  if (chapterUpdate.error) {
+    console.log("Update chapter", chapterUpdate.error);
+    return redirect(`/admin/content/edit-chapter/${chapterId}`);
+  }
+
+  revalidatePath(`/admin/content/view-subject/${chapterUpdate.data.subjectId}`);
+  return redirect(`/admin/content/view-subject/${chapterUpdate.data.subjectId}`);
+}
+
+export async function deleteChapterAction(chapterId: number) {
+  const supabase = await createClient();
+  const chapter = await getChapterContent(chapterId);
+
+  if (!chapter) {
+    return notFound();
+  }
+  
+  const chapterDelete = await supabase.from("SubjectChapters").delete().eq("id", chapterId);
+  if (chapterDelete.error) {
+    console.log("Chapter delete", chapterDelete.error);
+    return;
+  }
+
+  return revalidatePath(`/admin/content/view-subject/${chapter.subjectId}`);
 }
 
 export async function createMaterialAction(chapterId: number, formData: FormData) { 
