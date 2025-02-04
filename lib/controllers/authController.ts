@@ -1,7 +1,7 @@
-export const Roles = {
-  Student: 1,
-  Teacher: 2,
-  Admin: 3
+export namespace Roles {
+  export const Student = 1;
+  export const Teacher = 2;
+  export const Admin = 3;
 }
 
 export type UserMetadata = {
