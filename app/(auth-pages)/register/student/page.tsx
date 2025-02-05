@@ -28,9 +28,7 @@ export default async function Signup(props: {
             Autentifică-te
           </Link>
         </p>
-        <div className="mt-6">
-          <FormMessage message={searchParams} />
-        </div>
+        <FormMessage message={searchParams} />
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-5">
           <Label htmlFor="lastName">Nume</Label>
           <Input name="lastName" placeholder="Numele tău" required />

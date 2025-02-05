@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Roles, UserMetadata } from "../controllers/authController";
 import { getUserByEmail } from "../controllers/userController";
+import { initialCredits } from "../config";
 
 const authPaths = {
   signIn: "/sign-in",
@@ -116,7 +117,7 @@ export const studentSignUpAction = async (formData: FormData) => {
       {
         firstname: firstName,
         lastname: lastName,
-        creditPoints: 0,
+        creditPoints: initialCredits,
         userId: userId.data.id,
       }
     ]);
@@ -250,7 +251,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     encodedRedirect(
       "error",
       authPaths.reset,
-      "Actualizarea parolei a eșuat",
+      error.message,
     );
   }
 

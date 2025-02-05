@@ -7,12 +7,12 @@ export function FormMessage({ message }: { message: Message }) {
   return (
     <div className="flex flex-col gap-2 w-full max-w-md text-base">
       {"success" in message && (
-        <div className="text-foreground border-l-2 border-foreground px-4">
+        <div className="text-foreground border-l-2 border-foreground px-4 mt-6">
           {message.success}
         </div>
       )}
       {"error" in message && (
-        <div className="text-destructive border-l-2 border-destructive px-4">
+        <div className="text-destructive border-l-2 border-destructive px-4 mt-6">
           {message.error}
         </div>
       )}

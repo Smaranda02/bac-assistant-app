@@ -20,9 +20,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
     <Card className="p-4">
       <form className="flex flex-col min-w-96 mx-auto">
         <h1 className="text-2xl font-medium">Autentificare</h1>
-        <div className="mt-6">
-          <FormMessage message={searchParams} />
-        </div>
+        <FormMessage message={searchParams} />
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-5">
           <Label htmlFor="email">Email</Label>
           <Input name="email" placeholder="you@example.com" required />
