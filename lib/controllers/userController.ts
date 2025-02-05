@@ -35,7 +35,6 @@ export async function getAllUsers() {
     `, {
       count:"exact"
     });
-  console.log(teachersQuery.data);
 
   const studentsQuery = await supabase.from("Students").select("*");
 
