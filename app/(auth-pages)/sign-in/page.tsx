@@ -8,11 +8,22 @@ import { Card } from "@/components/ui/card";
 
 export default async function Login(props: { searchParams: Promise<Message> }) {
   const searchParams = await props.searchParams;
+  if ("message" in searchParams) {
+    return (
+      <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
+        <FormMessage message={searchParams} />
+      </div>
+    );
+  }
+
   return (
     <Card className="p-4">
       <form className="flex flex-col min-w-96 mx-auto">
         <h1 className="text-2xl font-medium">Autentificare</h1>
-        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
+        <div className="mt-6">
+          <FormMessage message={searchParams} />
+        </div>
+        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-5">
           <Label htmlFor="email">Email</Label>
           <Input name="email" placeholder="you@example.com" required />
           <div className="flex justify-between items-center">
@@ -33,7 +44,6 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
           <SubmitButton pendingText="În curs de autentificare..." formAction={signInAction}>
             Autentificare
           </SubmitButton>
-          <FormMessage message={searchParams} />
         </div>
       </form>
     </Card>

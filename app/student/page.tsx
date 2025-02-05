@@ -42,7 +42,7 @@ export default async function StudentHome() {
 
       <section className="my-3" id="content">
         <h3 className="font-bold text-lg mb-2">Materiale de studiu</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
           {subjects && subjects.length > 0 ? (
             subjects.map((subject) => (
               <Link key={subject.id} href={`/${subject.id}/content`}>

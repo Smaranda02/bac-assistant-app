@@ -8,17 +8,22 @@ export async function getCurrentUser() {
     return null;
   }
 
+  return getUserByEmail(user.data.user.email);
+}
+
+export async function getUserByEmail(email: string) {
+  const supabase = await createClient();
   const userQuery = await supabase.from("Users")
     .select(`
       *,
       teacher:Teachers(*),
       student:Students(*)
     `)
-    .eq("email", user.data.user.email)
+    .eq("email", email)
     .single();
 
   if (userQuery.error) {
-    console.log("Get current user", userQuery.error);
+    console.log("Get user", userQuery.error);
   }
 
   return userQuery.data;

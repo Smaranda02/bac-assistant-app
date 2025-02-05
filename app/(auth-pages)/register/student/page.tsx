@@ -28,7 +28,10 @@ export default async function Signup(props: {
             Autentifică-te
           </Link>
         </p>
-        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
+        <div className="mt-6">
+          <FormMessage message={searchParams} />
+        </div>
+        <div className="flex flex-col gap-2 [&>input]:mb-3 mt-5">
           <Label htmlFor="lastName">Nume</Label>
           <Input name="lastName" placeholder="Numele tău" required />
           
@@ -59,7 +62,6 @@ export default async function Signup(props: {
           <SubmitButton formAction={studentSignUpAction} pendingText="Se crează contul...">
             Înregistrare
           </SubmitButton>
-          <FormMessage message={searchParams} />
         </div>
       </form>
     </Card>

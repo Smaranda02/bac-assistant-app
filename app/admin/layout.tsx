@@ -3,7 +3,8 @@ import AdminMenu from "@/components/layout/admin-menu";
 const adminMenu = [
   {label: "Panou de control", link: "/admin/dashboard"},
   {label: "Conținut", link: "/admin/content"},
-  {label: "Utilizatori", link: "/admin/users"}
+  {label: "Utilizatori", link: "/admin/users"},
+  {label: "Confirmare profesori", link: "/admin/confirm-teachers"}
 ]
 
 export default async function Layout({

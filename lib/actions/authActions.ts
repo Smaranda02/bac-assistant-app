@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Roles, UserMetadata } from "../controllers/authController";
+import { getUserByEmail } from "../controllers/userController";
 
 const authPaths = {
   signIn: "/sign-in",
@@ -155,7 +156,8 @@ export const teacherSignUpAction = async (formData: FormData) => {
       return encodedRedirect("error", authPaths.teacherSignUp, dbErrorTeachers.message);
     }
 
-    return redirect("/");
+    await supabase.auth.signOut();
+    return encodedRedirect("success", authPaths.teacherSignUp, "Contul a fost creat și îl vei putea accesa imediat ce este confirmat de către un administrator");
   }
 };
 
@@ -164,6 +166,12 @@ export const signInAction = async (formData: FormData) => {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const supabase = await createClient();
+
+  // Check if teacher which is not yet confirmed
+  const user = await getUserByEmail(email);
+  if (user && user.teacher && !user.teacher.confirmed) {
+    return encodedRedirect("error", authPaths.signIn, "Contul nu a fost confirmat de un administrator");
+  }
 
   const { error } = await supabase.auth.signInWithPassword({
     email,

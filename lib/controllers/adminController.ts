@@ -60,3 +60,22 @@ export async function getActivityStatistics() {
     period: rangeString
   }
 }
+
+export async function getUnconfirmedTeachers() {
+  const supabase = await createClient();
+  const teachersQuery = await supabase.from("Teachers")
+    .select(`
+      id,
+      firstname,
+      lastname,
+      ...Subjects!inner(subject:name)
+    `)
+    .eq("confirmed", false);
+
+  if (teachersQuery.error) {
+    console.log("Unconfirmed teachers", teachersQuery.error);
+    return [];
+  }
+
+  return teachersQuery.data;
+}
