@@ -68,7 +68,8 @@ export async function getUnconfirmedTeachers() {
       id,
       firstname,
       lastname,
-      ...Subjects!inner(subject:name)
+      ...Subjects!inner(subject:name),
+      ...Users!inner(email)
     `)
     .eq("confirmed", false);
 

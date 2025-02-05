@@ -14,7 +14,12 @@ export default async function AdminUsersPage() {
       <ul>
         {users.students.map(s => (
           <li className="my-2 px-3 py-2 border rounded flex gap-2 items-center bg-white" key={`test-${s.id}`}>
-            <span className="mr-auto py-1">{s.firstname} {s.lastname}</span>
+            <div className="mr-auto py-1">
+              <div className="">{s.firstname} {s.lastname}</div>
+              <div className="text-sm text-muted-foreground">
+                {s.email}
+              </div>
+            </div>
             <Badge variant="secondary" className="bg-green-300 hover:bg-green-300">{s.creditPoints} puncte credit</Badge>
           </li>
         ))}
@@ -23,7 +28,12 @@ export default async function AdminUsersPage() {
       <ul>
         {users.teachers.map(t => (
           <li className="my-2 px-3 py-2 border rounded flex gap-2 items-center bg-white" key={`test-${t.id}`}>
-          <span className="mr-auto py-1">{t.firstname} {t.lastname}</span>
+          <div className="mr-auto py-1">
+            <div className="">{t.firstname} {t.lastname}</div>
+            <div className="text-sm text-muted-foreground">
+              {t.email}
+            </div>
+          </div>
           <Badge variant="secondary">{t.subject.name}</Badge>
         </li>
         ))}

@@ -36,12 +36,13 @@ export async function getAllUsers() {
     .select(`
       *,
       subject:Subjects!inner(name),
-      createdTests:PracticeTests(id)
+      createdTests:PracticeTests(id),
+      ...Users!inner(email)
     `, {
       count:"exact"
     });
 
-  const studentsQuery = await supabase.from("Students").select("*");
+  const studentsQuery = await supabase.from("Students").select("*, ...Users!inner(email)");
 
   if (teachersQuery.error) {
     console.log("Get all teachers", teachersQuery.error);

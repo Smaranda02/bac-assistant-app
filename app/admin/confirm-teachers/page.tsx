@@ -11,7 +11,12 @@ export default async function AdminConfirmTeachers() {
       <ul>
         {unconfirmedTeachers.map(t => (
           <li className="my-2 px-3 py-2 border rounded flex gap-2 items-center bg-white" key={`test-${t.id}`}>
-          <span className="mr-auto py-1">{t.firstname} {t.lastname}</span>
+          <div className="mr-auto py-1">
+            <div className="">{t.firstname} {t.lastname}</div>
+            <div className="text-sm text-muted-foreground">
+              {t.email}
+            </div>
+          </div>
           <Badge variant="secondary" className="mr-20">{t.subject}</Badge>
           <form action={confirmTeacherAction.bind(null, t.id)}>
             <SubmitButton size="sm">Confirmă cont</SubmitButton>
