@@ -38,7 +38,7 @@ export async function updateStudentCredits(studentId: number, amount: number) {
     return false;
   }
 
-  if (studentQuery.data.creditPoints - amount < 0) {
+  if (studentQuery.data.creditPoints + amount < 0) {
     console.log("Invalid credits amount");
     return false;
   }
